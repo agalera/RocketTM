@@ -3,7 +3,7 @@
 [![pythonversions](https://img.shields.io/pypi/pyversions/rockettm.svg)](https://pypi.python.org/pypi/rockettm)
 
 # Rocket task manager
-Server task manager in python
+Asynchronous task manager in python
 
 ## Install
 
