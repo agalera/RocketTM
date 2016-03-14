@@ -21,17 +21,19 @@ Link pypi: https://pypi.python.org/pypi/rockettm
 # send task
 from rockettm import send_task
 
-send_task("rocket1", "function1", "h", "o", "l", "a")
+send_task("queue_name", "name_task", "arg1", ["arg2", "2"], {'args': 3}, ('arg', 4))
 
 ```
 
 ### Declare new task
+Warning! if there are 2 tasks registered with the same name, will run 2!
+
 ```python
 # task example
 from rockettm import task
 
 
-@task('function1')
+@task('name_task')
 def function1(*args, **kwargs):
     return True
 
