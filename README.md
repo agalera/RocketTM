@@ -56,3 +56,14 @@ Run server
 ```bash
 rabbitmq_server file_settings.py
 ```
+
+## Documentation
+### Functions
+- task(name_task_event)
+It is a decorator to create tasks
+
+- send_task(queue, name_task, *args)
+Send task
+
+- add_task(name_task, func(object))
+Add manual task
