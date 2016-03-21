@@ -18,7 +18,7 @@ else:
 map(__import__, settings.imports)
 
 
-def worker(queue_name):
+def worker(name, concurrency, durable=False):
     def callback(ch, method, properties, body):
         recv = json.loads(body)
         try:
@@ -30,12 +30,12 @@ def worker(queue_name):
 
     conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
     channel = conn.channel()
-    channel.queue_declare(queue=queue_name)
+    channel.queue_declare(queue=name, durable=durable)
     channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(callback, queue=queue_name, no_ack=False)
+    channel.basic_consume(callback, queue=name, no_ack=False)
     channel.start_consuming()
 
 for queue in settings.queues:
     for x in xrange(queue['concurrency']):
-        p = Process(target=worker, args=(queue['name'], ))
+        p = Process(target=worker, kwargs=queue)
         p.start()

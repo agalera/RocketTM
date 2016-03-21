@@ -16,6 +16,16 @@ Link pypi: https://pypi.python.org/pypi/rockettm
 
 ## Example
 
+### Rabbitmq not is localhost
+```python
+# send task
+from rockettm import connect
+
+# to run it, reconnect to RabbitMQ
+connect("other_ip_or_domain")
+
+```
+
 ### Send task
 ```python
 # send task
