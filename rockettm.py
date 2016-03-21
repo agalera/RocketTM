@@ -7,7 +7,8 @@ class tasks(object):
     subs = {}
     logger = print
     conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-    queues = {}
+    channel = conn.channel()
+    queues = []
 
     @staticmethod
     def add_task(event, func):
@@ -26,15 +27,12 @@ class tasks(object):
     @staticmethod
     def send_task(queue, event, *args):
         if queue not in tasks.queues:
-            channel = tasks.conn.channel()
-            channel.queue_declare(queue=queue)
-            tasks.queues[queue] = channel
-        else:
-            channel = tasks.queues[queue]
-        channel.basic_publish(exchange='',
-                              routing_key=queue,
-                              body=json.dumps({'event': event, 'args': args}))
-
+            tasks.queues.append(queue)
+            tasks.channel.queue_declare(queue=queue)
+        tasks.channel.basic_publish(exchange='',
+                                    routing_key=queue,
+                                    body=json.dumps({'event': event,
+                                                     'args': args}))
 
 # avoids having to import tasks
 send_task = tasks.send_task
