@@ -54,10 +54,17 @@ def function1(*args, **kwargs):
 # settings.py example
 ip = "localhost"
 port = 5672
+
+# search @task in imports
 imports = ['examples.test1',
            'examples.test2']
 
-queues = [{'name': 'rocket1', 'concurrency': 7},
+# support params
+# name (mandatory), string
+# concurrency (mandatory), int
+# durable (optional), boolean
+
+queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 7},
           {'name': 'rocket2', 'concurrency': 1}]
 
 ```
@@ -83,5 +90,8 @@ Send task
 
 Add manual task
 
-## TODO
-- Support retrying
+
+- connect(ip_or_domain)
+
+connects to another server other than localhost
+
