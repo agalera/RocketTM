@@ -32,7 +32,7 @@ except:
 
 setup(
     name='rockettm',
-    version='0.0.2',
+    version='0.0.3',
     description='Rocket task manager',
     long_description=readme+'\n\n'+changelog,
     author='Alberto Galera Jimenez',
