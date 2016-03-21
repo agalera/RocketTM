@@ -72,3 +72,6 @@ Send task
 - add_task(name_task, func(object))
 
 Add manual task
+
+## TODO
+- Support retrying
