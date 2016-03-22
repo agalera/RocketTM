@@ -18,12 +18,38 @@ Link pypi: https://pypi.python.org/pypi/rockettm
 
 ### Rabbitmq not is localhost
 ```python
-# send task
 from rockettm import connect
 
 # to run it, reconnect to RabbitMQ
 connect("other_ip_or_domain")
 
+```
+
+### Configure logger in client
+Using standard logger in python
+https://docs.python.org/2/library/logging.html#logging.basicConfig
+
+```python
+import logging
+from rockettm import send_task
+
+# 50 CRITICAL, 40 ERROR, 30 WARNING, 20 INFO, 10 DEBUG, 0 NOTSET
+logging.basicConfig(level=20)
+send_task("queue_name", "name_task", "Pepito")
+
+```
+
+### Configure logger in server
+in settings.py:
+
+```python
+# filename (DEFAULT "rockettm.log")
+# level (DEFAULT 30)
+# 50 CRITICAL, 40 ERROR, 30 WARNING, 20 INFO, 10 DEBUG, 0 NOTSET
+logger = {'filename': "rockettm.log",  # optional,
+                                       # is not defined print in console
+          'level': 10  # optional
+         }
 ```
 
 ### Send task
@@ -54,6 +80,11 @@ def function1(*args, **kwargs):
 # settings.py example
 ip = "localhost"
 port = 5672
+
+logger = {'filename': "rockettm.log",  # optional,
+                                       # is not defined print in console
+          'level': 10  # optional
+          }
 
 # search @task in imports
 imports = ['examples.test1',
@@ -94,4 +125,3 @@ Add manual task
 - connect(ip_or_domain)
 
 connects to another server other than localhost
-

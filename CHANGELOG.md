@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.1.0 (2016-03-22)
+  - Permit change log
+
 ## 0.0.4 (2016-03-21)
   - Fix CHANGELOG
   - Update README

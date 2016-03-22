@@ -1,5 +1,12 @@
 ip = "localhost"
 port = 5672
+
+logger = {'filename': "rockettm.log",  # optional,
+                                       # is not defined print in console
+          'level': 20  # optional
+          }
+
+# search @task in imports
 imports = ['examples.test1',
            'examples.test2']
 
