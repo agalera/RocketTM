@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.1.1 (2016-04-27)
+  - Fix dependencies
+
 ## 0.1.0 (2016-03-22)
   - Permit change log
 
