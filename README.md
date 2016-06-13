@@ -94,9 +94,10 @@ imports = ['examples.test1',
 # name (mandatory), string
 # concurrency (mandatory), int
 # durable (optional), boolean
-
+# max_time (in seconds) (optional), int
 queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 7},
-          {'name': 'rocket2', 'concurrency': 1}]
+          {'name': 'rocket2', 'concurrency': 1},
+          {'name': 'rocket3', 'max_time': 10}]
 
 ```
 
