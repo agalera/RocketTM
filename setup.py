@@ -32,7 +32,7 @@ except:
 
 setup(
     name='rockettm',
-    version='0.2.0',
+    version='0.2.1',
     description='Rocket task manager',
     long_description=readme+'\n\n'+changelog,
     author='Alberto Galera Jimenez',
@@ -60,7 +60,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'rockettm_server = rockettm_server'
+            'rockettm_server = rockettm_server:main'
         ]
     },
 )

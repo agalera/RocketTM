@@ -61,12 +61,18 @@ def worker(name, concurrency, durable=False, max_time=-1):
     conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
     channel = conn.channel()
     logging.info("create queue: %s durable: %s" % (name, durable))
+    channel.queue_declare(queue=name, passive=True)
     channel.basic_qos(prefetch_count=1)
     channel.basic_consume(callback, queue=name, no_ack=False)
     channel.start_consuming()
 
-for queue in settings.queues:
-    for x in xrange(queue['concurrency']):
-        p = Process(target=worker, kwargs=queue)
-        logging.info("start process worker: %s queue: %s" % (worker, queue))
-        p.start()
+def main():
+    for queue in settings.queues:
+        for x in xrange(queue['concurrency']):
+            p = Process(target=worker, kwargs=queue)
+            logging.info("start process worker: %s queue: %s" % (worker, queue))
+            p.start()
+
+if __name__ == "__main__":
+    main()
+
