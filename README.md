@@ -102,7 +102,7 @@ imports = ['examples.test1',
 # max_time (in seconds) (optional), int
 queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 7},
           {'name': 'rocket2', 'concurrency': 1},
-          {'name': 'rocket3', 'max_time': 10}]
+          {'name': 'rocket3', 'concurrency': 1, 'max_time': 10}]
 
 ```
 
