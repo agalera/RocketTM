@@ -31,7 +31,8 @@ def worker(name, concurrency, durable=False):
                 func(*recv['args'])
         except:
             logging.error(traceback.format_exc())
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        finally:
+            ch.basic_ack(delivery_tag=method.delivery_tag)
 
     conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
     channel = conn.channel()
