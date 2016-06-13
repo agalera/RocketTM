@@ -19,16 +19,16 @@ class tasks(object):
         tasks.channel = tasks.conn.channel()
 
     @staticmethod
-    def add_task(event, func):
+    def add_task(event, func, max_time=-1):
         logging.info("add task %s" % event)
         if event not in tasks.subs:
             tasks.subs[event] = []
-        tasks.subs[event].append(func)
+        tasks.subs[event].append((func, max_time))
 
     @staticmethod
-    def task(event):
+    def task(event, max_time=-1):
         def wrap_function(func):
-            tasks.add_task(event, func)
+            tasks.add_task(event, func, max_time)
             return func
         return wrap_function
 
