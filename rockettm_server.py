@@ -45,8 +45,13 @@ def worker(name, concurrency, durable=False, max_time=-1):
         recv = json.loads(body)
         logging.info("execute %s" % recv['event'])
         try:
-            for func in tasks.subs[recv['event']]:
-                with time_limit(max_time):
+            for func, max_time2 in tasks.subs[recv['event']]:
+                if max_time2 != -1:
+                    apply_max_time = max_time2
+                else:
+                    apply_max_time = max_time
+
+                with time_limit(apply_max_time):
                     func(*recv['args'])
         except:
             logging.error(traceback.format_exc())
