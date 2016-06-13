@@ -73,6 +73,11 @@ from rockettm import task
 def function1(*args, **kwargs):
     return True
 
+# max_time(timeout in seconds) example
+@task('name_task2', max_time=10)
+def long_call(*args, **kwargs):
+    return True
+
 ```
 
 ### settings.py example
