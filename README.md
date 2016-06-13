@@ -128,4 +128,4 @@ Add manual task
 connects to another server other than localhost
 
 ## TODO
-- time max execution task
+- time max execution per task (actually per queue)
