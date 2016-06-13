@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.0 (2016-06-13)
+  - add support timeout (tasks and queues)
+
 ## 0.1.1 (2016-04-27)
   - Fix dependencies
 
