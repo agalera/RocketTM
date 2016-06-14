@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.2 (2016-06-14)
+ - hotfix bad raise
+
 ## 0.2.1 (2016-06-14)
   - Hotfix rabbitmq_server command
 
