@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.3 (2016-06-14)
+ - Add new dependency (timekiller)
+
 ## 0.2.2 (2016-06-14)
  - hotfix bad raise
 

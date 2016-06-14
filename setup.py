@@ -32,15 +32,15 @@ except:
 
 setup(
     name='rockettm',
-    version='0.2.2',
+    version='0.2.3',
     description='Rocket task manager',
-    long_description=readme+'\n\n'+changelog,
+    long_description=readme + '\n\n' + changelog,
     author='Alberto Galera Jimenez',
     author_email='galerajimenez@gmail.com',
     url='https://github.com/kianxineki/rockettm',
     py_modules=['rockettm', 'rockettm_server'],
     include_package_data=True,
-    install_requires=['amqp', 'pika'],
+    install_requires=['amqp', 'pika', 'timekiller'],
     license="GPL",
     zip_safe=False,
     keywords='rockettm',

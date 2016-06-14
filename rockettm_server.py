@@ -6,24 +6,7 @@ import pika
 import json
 import sys
 import os
-import signal
-from contextlib import contextmanager
-
-
-class TimeoutException(Exception):
-    pass
-
-
-@contextmanager
-def time_limit(seconds):
-    def signal_handler(signum, frame):
-        raise TimeoutException("Timed out!")
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(seconds)
-    try:
-        yield
-    finally:
-        signal.alarm(0)
+from timekiller import call
 
 
 if len(sys.argv) == 2:
@@ -51,8 +34,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
                 else:
                     apply_max_time = max_time
 
-                with time_limit(apply_max_time):
-                    func(*recv['args'])
+                call(func, apply_max_time, *recv['args'])
         except:
             logging.error(traceback.format_exc())
         finally:
@@ -66,13 +48,14 @@ def worker(name, concurrency, durable=False, max_time=-1):
     channel.basic_consume(callback, queue=name, no_ack=False)
     channel.start_consuming()
 
+
 def main():
     for queue in settings.queues:
         for x in xrange(queue['concurrency']):
             p = Process(target=worker, kwargs=queue)
-            logging.info("start process worker: %s queue: %s" % (worker, queue))
+            logging.info("start process worker: %s queue: %s" % (worker,
+                                                                 queue))
             p.start()
 
 if __name__ == "__main__":
     main()
-
