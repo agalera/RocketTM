@@ -108,7 +108,7 @@ queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 7},
 
 Run server
 ```bash
-rabbitmq_server file_settings.py
+rockettm_server file_settings.py
 ```
 
 ## Documentation
