@@ -43,7 +43,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
     conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
     channel = conn.channel()
     logging.info("create queue: %s durable: %s" % (name, durable))
-    channel.queue_declare(queue=name, passive=True)
+    channel.queue_declare(queue=name, durable=True)
     channel.basic_qos(prefetch_count=1)
     channel.basic_consume(callback, queue=name, no_ack=False)
     channel.start_consuming()
