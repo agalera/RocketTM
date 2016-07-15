@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.4 (2016-07-15)
+ - Fix automatic declare queue
+
 ## 0.2.3 (2016-06-14)
  - Add new dependency (timekiller)
 
