@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.5 (2016-07-15)
+ - py3 compatibility
+
 ## 0.2.4 (2016-07-15)
  - Fix automatic declare queue
 
