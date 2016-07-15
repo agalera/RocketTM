@@ -51,7 +51,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
 def main():
     for queue in settings.queues:
-        for x in xrange(queue['concurrency']):
+        for x in range(queue['concurrency']):
             p = Process(target=worker, kwargs=queue)
             logging.info("start process worker: %s queue: %s" % (worker,
                                                                  queue))
