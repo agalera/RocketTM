@@ -1,4 +1,9 @@
 # CHANGELOG
+## 0.2.6 (2016-07-15)
+ - py3 compatibility
+ - fix hardcoding durable
+ - ignore not exists logger config
+
 ## 0.2.5 (2016-07-15)
  - py3 compatibility
 
