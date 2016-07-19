@@ -1,6 +1,7 @@
 from pika import BlockingConnection, ConnectionParameters
 import json
 import logging
+import uuid
 
 
 class tasks(object):
@@ -34,6 +35,10 @@ class tasks(object):
 
     @staticmethod
     def send_task(queue, event, *args):
+        _id = str(uuid.uuid4())
+        # TODO: really I have to explain? XD
+        args = list(args)
+        args.insert(0, _id)
         logging.info("send task to queue %s, event %s" % (queue, event))
         if not tasks.channel or tasks.channel.is_closed:
             tasks.connect()
@@ -45,11 +50,18 @@ class tasks(object):
                 error = "Queue not declare, first start the server"
                 logging.error(error)
                 raise Exception(error)
-
-        tasks.channel.basic_publish(exchange='',
-                                    routing_key=queue,
-                                    body=json.dumps({'event': event,
-                                                     'args': args}))
+        retries = 0
+        while retries < 5:
+            try:
+                tasks.channel.basic_publish(exchange='',
+                                            routing_key=queue,
+                                            body=json.dumps({'event': event,
+                                                             'args': args}))
+                break
+            except:
+                retries += 1
+                tasks.connect()
+        return _id
 
 # avoids having to import tasks
 connect = tasks.connect

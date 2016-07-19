@@ -1,8 +1,16 @@
 # CHANGELOG
+## 1.0.0 (2016-07-19)
+ - Added callback support
+ - generate uuid for task
+ - all tasks get _id in first attr
+ - if multiple tasks with the same name, if continued with the following fails
+ - prevent connection closed to send_task (automatic reconnect)
+
 ## 0.2.6 (2016-07-15)
  - py3 compatibility
  - fix hardcoding durable
  - ignore not exists logger config
+
 
 ## 0.2.5 (2016-07-15)
  - py3 compatibility

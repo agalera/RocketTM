@@ -8,6 +8,7 @@ import sys
 import os
 from timekiller import call
 import importlib
+import requests
 
 
 if len(sys.argv) == 2:
@@ -25,8 +26,22 @@ try:
 except:
     pass
 
+try:
+    callback_api = settings.callback_api
+except:
+    callback_api = None
+
 for mod in settings.imports:
     importlib.import_module(mod)
+
+
+def call_api(json):
+    if not callback_api:
+        return
+    try:
+        requests.post(callback_api, json=json)
+    except:
+        pass
 
 
 def worker(name, concurrency, durable=False, max_time=-1):
@@ -38,15 +53,22 @@ def worker(name, concurrency, durable=False, max_time=-1):
         recv = json.loads(body)
         logging.info("execute %s" % recv['event'])
         try:
-            print("recv", recv)
             for func, max_time2 in tasks.subs[recv['event']]:
+                logging.info("exec func: %s, timeout: %s" % (func, max_time2))
                 if max_time2 != -1:
                     apply_max_time = max_time2
                 else:
                     apply_max_time = max_time
-                call(func, apply_max_time, *recv['args'])
-        except:
-            logging.error(traceback.format_exc())
+                try:
+                    result = call(func, apply_max_time, *recv['args'])
+                    call_api({'_id': recv['args'][0],
+                              'result': result, 'success': True})
+                except:
+                    call_api({'_id': recv['args'][0],
+                              'result': traceback.format_exc(),
+                              'success': False})
+
+                    logging.error(traceback.format_exc())
         finally:
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
