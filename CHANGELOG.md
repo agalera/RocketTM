@@ -1,4 +1,7 @@
 # CHANGELOG
+## 1.0.1 (2016-08-22)
+ - send_task now sends the set ip 
+
 ## 1.0.0 (2016-07-19)
  - Added callback support
  - generate uuid for task
