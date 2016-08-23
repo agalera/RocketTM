@@ -1,4 +1,8 @@
 # CHANGELOG
+
+## 1.0.2 (2016-08-23)
+ - Fix automatic declare queues
+
 ## 1.0.1 (2016-08-22)
  - send_task now sends the set ip 
 

@@ -1,6 +1,6 @@
 import logging
 from multiprocessing import Process
-from rockettm import tasks, connect
+from rockettm import tasks
 import traceback
 import pika
 import json
@@ -33,6 +33,8 @@ except:
 
 for mod in settings.imports:
     importlib.import_module(mod)
+
+tasks.ip = settings.ip
 
 
 def call_api(json):
@@ -73,7 +75,6 @@ def worker(name, concurrency, durable=False, max_time=-1):
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
     conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
-    connect(settings.ip)
     channel = conn.channel()
     logging.info("create queue: %s durable: %s" % (name, durable))
     channel.queue_declare(queue=name, durable=durable)
