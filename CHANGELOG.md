@@ -1,4 +1,7 @@
 # CHANGELOG
+## 1.0.3 (2016-08-25)
+ - Solved multiple errors with disconnection with RabbitMQ
+ - Update python compatibility (py2.x no loger supported)
 
 ## 1.0.2 (2016-08-23)
  - Fix automatic declare queues
