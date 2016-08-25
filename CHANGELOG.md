@@ -1,4 +1,7 @@
 # CHANGELOG
+## 1.0.4 (2016-08-25)
+ - run tasks in safe and asolated proccess
+
 ## 1.0.3 (2016-08-25)
  - Solved multiple errors with disconnection with RabbitMQ
  - Update python compatibility (py2.x no loger supported)

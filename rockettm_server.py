@@ -1,5 +1,5 @@
 import logging
-from multiprocessing import Process
+from multiprocessing import Process, Manager
 from rockettm import tasks
 import traceback
 import pika
@@ -47,7 +47,18 @@ def call_api(json):
         pass
 
 
+def safe_worker(func, return_dict, *args, **kwargs):
+    return_dict['result'] = func(*args, **kwargs)
+
 def worker(name, concurrency, durable=False, max_time=-1):
+    def safe_call(func, *args, **kwargs):
+        return_dict = Manager().dict()
+        args = (func, return_dict) + args
+        p = Process(target=safe_worker, args=args, kwargs=kwargs)
+        p.start()
+        p.join()
+        return return_dict['result']
+
     def callback(ch, method, properties, body):
         # py3 support
         if isinstance(body, bytes):
@@ -69,7 +80,8 @@ def worker(name, concurrency, durable=False, max_time=-1):
                 else:
                     apply_max_time = max_time
                 try:
-                    result = call(func, apply_max_time, *recv['args'])
+                    result = safe_call(call, func, apply_max_time,
+                                       *recv['args'])
                     call_api({'_id': recv['args'][0],
                               'result': result, 'success': True})
                 except:
@@ -79,7 +91,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
                     logging.error(traceback.format_exc())
         finally:
-           ch.basic_ack(delivery_tag=method.delivery_tag)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
 
     while True:
         try:
@@ -92,6 +104,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
             channel.start_consuming()
         except:
             logging.error("worker disconnect, try reconnect")
+            break
             time.sleep(5)
 
 
