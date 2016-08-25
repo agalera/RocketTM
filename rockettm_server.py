@@ -55,6 +55,12 @@ def worker(name, concurrency, durable=False, max_time=-1):
         recv = json.loads(body)
         logging.info("execute %s" % recv['event'])
         try:
+            if not recv['event'] in tasks.subs:
+                call_api({'_id': recv['args'][0],
+                          'result': 'task not defined',
+                          'success': False})
+                return False
+
             for func, max_time2 in tasks.subs[recv['event']]:
                 logging.info("exec func: %s, timeout: %s" % (func, max_time2))
                 if max_time2 != -1:
