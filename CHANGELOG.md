@@ -1,4 +1,8 @@
 # CHANGELOG
+## 1.0.5 (2016-08-26)
+ - timekiller stop propagate
+ - fix inmortal server
+
 ## 1.0.4 (2016-08-25)
  - run tasks in safe and asolated proccess
 

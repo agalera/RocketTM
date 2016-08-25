@@ -48,7 +48,12 @@ def call_api(json):
 
 
 def safe_worker(func, return_dict, *args, **kwargs):
-    return_dict['result'] = func(*args, **kwargs)
+    try:
+        return_dict['result'] = func(*args, **kwargs)
+        return_dict['success'] = True
+    except:
+        return_dict['result'] = traceback.format_exc()
+        return_dict['success'] = False
 
 def worker(name, concurrency, durable=False, max_time=-1):
     def safe_call(func, *args, **kwargs):
@@ -57,7 +62,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
         p = Process(target=safe_worker, args=args, kwargs=kwargs)
         p.start()
         p.join()
-        return return_dict['result']
+        return return_dict
 
     def callback(ch, method, properties, body):
         # py3 support
@@ -79,17 +84,13 @@ def worker(name, concurrency, durable=False, max_time=-1):
                     apply_max_time = max_time2
                 else:
                     apply_max_time = max_time
-                try:
-                    result = safe_call(call, func, apply_max_time,
-                                       *recv['args'])
-                    call_api({'_id': recv['args'][0],
-                              'result': result, 'success': True})
-                except:
-                    call_api({'_id': recv['args'][0],
-                              'result': traceback.format_exc(),
-                              'success': False})
 
-                    logging.error(traceback.format_exc())
+                result = safe_call(call, func, apply_max_time,
+                                   *recv['args'])
+                result['_id'] = recv['args'][0]
+                call_api(result)
+                if not result['success']:
+                    logging.error(result['result'])
         finally:
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -102,6 +103,9 @@ def worker(name, concurrency, durable=False, max_time=-1):
             channel.basic_qos(prefetch_count=1)
             channel.basic_consume(callback, queue=name, no_ack=False)
             channel.start_consuming()
+        except (KeyboardInterrupt, SystemExit):
+            print("server stop!")
+            break
         except:
             logging.error("worker disconnect, try reconnect")
             time.sleep(5)
