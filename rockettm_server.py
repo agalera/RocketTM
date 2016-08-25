@@ -104,7 +104,6 @@ def worker(name, concurrency, durable=False, max_time=-1):
             channel.start_consuming()
         except:
             logging.error("worker disconnect, try reconnect")
-            break
             time.sleep(5)
 
 
