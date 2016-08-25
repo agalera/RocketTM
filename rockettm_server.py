@@ -9,6 +9,7 @@ import os
 from timekiller import call
 import importlib
 import requests
+import time
 
 
 if len(sys.argv) == 2:
@@ -78,15 +79,20 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
                     logging.error(traceback.format_exc())
         finally:
-            ch.basic_ack(delivery_tag=method.delivery_tag)
+           ch.basic_ack(delivery_tag=method.delivery_tag)
 
-    conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
-    channel = conn.channel()
-    logging.info("create queue: %s durable: %s" % (name, durable))
-    channel.queue_declare(queue=name, durable=durable)
-    channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(callback, queue=name, no_ack=False)
-    channel.start_consuming()
+    while True:
+        try:
+            conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
+            channel = conn.channel()
+            logging.info("create queue: %s durable: %s" % (name, durable))
+            channel.queue_declare(queue=name, durable=durable)
+            channel.basic_qos(prefetch_count=1)
+            channel.basic_consume(callback, queue=name, no_ack=False)
+            channel.start_consuming()
+        except:
+            logging.error("worker disconnect, try reconnect")
+            time.sleep(5)
 
 
 def main():
