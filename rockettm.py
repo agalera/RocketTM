@@ -13,11 +13,14 @@ class tasks(object):
 
     @staticmethod
     def connect(ip=None):
-        logging.info("rabbitmq connect %s" % tasks.ip)
-        if ip:
-            tasks.ip = ip
-        tasks.conn = BlockingConnection(ConnectionParameters(tasks.ip))
-        tasks.channel = tasks.conn.channel()
+        try:
+            logging.info("rabbitmq connect %s" % tasks.ip)
+            if ip:
+                tasks.ip = ip
+            tasks.conn = BlockingConnection(ConnectionParameters(tasks.ip))
+            tasks.channel = tasks.conn.channel()
+        except:
+            pass
 
     @staticmethod
     def add_task(event, func, max_time=-1):
@@ -40,7 +43,9 @@ class tasks(object):
         args = list(args)
         args.insert(0, _id)
         logging.info("send task to queue %s, event %s" % (queue, event))
-        if not tasks.channel or tasks.channel.is_closed:
+        if (not tasks.channel or not tasks.conn
+            or tasks.channel.is_closed or tasks.conn.is_closed):
+            print("is closed, try reconnect")
             tasks.connect()
         if queue not in tasks.queues:
             try:
