@@ -2,6 +2,8 @@ from pika import BlockingConnection, ConnectionParameters
 import json
 import logging
 import uuid
+import traceback
+import time
 
 
 class tasks(object):
@@ -39,34 +41,35 @@ class tasks(object):
     @staticmethod
     def send_task(queue, event, *args):
         _id = str(uuid.uuid4())
-        # TODO: really I have to explain? XD
-        args = list(args)
-        args.insert(0, _id)
+        args = list((_id,) + args)
         logging.info("send task to queue %s, event %s" % (queue, event))
-        if (not tasks.channel or not tasks.conn
-            or tasks.channel.is_closed or tasks.conn.is_closed):
-            print("is closed, try reconnect")
-            tasks.connect()
-        if queue not in tasks.queues:
-            try:
-                tasks.channel.queue_declare(queue=queue, passive=True)
-                tasks.queues.append(queue)
-            except:
-                error = "Queue not declare, first start the server"
-                logging.error(error)
-                raise Exception(error)
         retries = 0
+        success = False
         while retries < 5:
             try:
+                if (not tasks.channel or not tasks.conn or
+                        tasks.channel.is_closed or tasks.conn.is_closed):
+                    logging.error("connection is closed, try reconnect")
+                    tasks.connect()
+
+                if queue not in tasks.queues:
+                    tasks.channel.queue_declare(queue=queue, passive=True)
+                    tasks.queues.append(queue)
+
                 tasks.channel.basic_publish(exchange='',
                                             routing_key=queue,
                                             body=json.dumps({'event': event,
                                                              'args': args}))
+                success = True
                 break
             except:
+                logging.error(traceback.format_exc())
                 retries += 1
-                tasks.connect()
-        return _id
+                time.sleep(1)
+        if success:
+            return _id
+        else:
+            raise Exception("it has not been possible to add in the queue the request")
 
 # avoids having to import tasks
 connect = tasks.connect

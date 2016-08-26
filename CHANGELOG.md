@@ -1,4 +1,8 @@
 # CHANGELOG
+## 1.0.6 (2016-08-26)
+ - retry sending the message to the queue 5 times before returning an exception
+ - When you add in the queue fails, now returns an exception
+ 
 ## 1.0.5 (2016-08-26)
  - timekiller stop propagate
  - fix inmortal server
