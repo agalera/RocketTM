@@ -1,4 +1,7 @@
 # CHANGELOG
+## 1.0.8 - 1.0.13 (2016-09-05)
+ - fix timeouts and other exceptions
+
 ## 1.0.7 (2016-09-05)
  - fix rabbitmq ack timeout
 

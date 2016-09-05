@@ -45,7 +45,7 @@ class tasks(object):
         logging.info("send task to queue %s, event %s" % (queue, event))
         retries = 0
         success = False
-        while retries < 5:
+        for retries in range(10):
             try:
                 if (not tasks.channel or not tasks.conn or
                         tasks.channel.is_closed or tasks.conn.is_closed):
@@ -56,17 +56,19 @@ class tasks(object):
                     tasks.channel.queue_declare(queue=queue, passive=True)
                     tasks.queues.append(queue)
 
-                tasks.channel.basic_publish(exchange='',
-                                            routing_key=queue,
-                                            body=json.dumps({'event': event,
-                                                             'args': args}))
-                success = True
-                break
+                if tasks.channel.basic_publish(exchange='',
+                                               routing_key=queue,
+                                               body=json.dumps({'event': event,
+                                                                'args': args})):
+                    success = True
+                    break
+                else:
+                    raise Exception("failed publish")
             except:
                 logging.error(traceback.format_exc())
-                retries += 1
                 time.sleep(1)
         if success:
+            logging.warning("send its ok!")
             return _id
         else:
             raise Exception("it has not been possible to the request to the queue")
