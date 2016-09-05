@@ -66,6 +66,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
     def callback(ch, method, properties, body):
         # py3 support
+        ch.
         if isinstance(body, bytes):
             body = body.decode('utf-8')
 
@@ -101,7 +102,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
             logging.info("create queue: %s durable: %s" % (name, durable))
             channel.queue_declare(queue=name, durable=durable)
             channel.basic_qos(prefetch_count=1)
-            channel.basic_consume(callback, queue=name, no_ack=False)
+            channel.basic_consume(callback, queue=name, no_ack=True)
             channel.start_consuming()
         except (KeyboardInterrupt, SystemExit):
             print("server stop!")
