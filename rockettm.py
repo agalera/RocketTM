@@ -69,7 +69,7 @@ class tasks(object):
         if success:
             return _id
         else:
-            raise Exception("it has not been possible to add in the queue the request")
+            raise Exception("it has not been possible to the request to the queue")
 
 # avoids having to import tasks
 connect = tasks.connect

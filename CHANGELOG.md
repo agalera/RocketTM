@@ -1,4 +1,7 @@
 # CHANGELOG
+## 1.0.7 (2016-09-05)
+ - fix rabbitmq ack timeout
+
 ## 1.0.6 (2016-08-26)
  - retry sending the message to the queue 5 times before returning an exception
  - When you add in the queue fails, now returns an exception
