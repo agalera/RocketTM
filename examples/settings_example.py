@@ -1,10 +1,14 @@
+import sys
+
+
 ip = "localhost"
 port = 5672
 
-logger = {'filename': "rockettm.log",  # optional,
-                                       # is not defined print in console
-          'level': 20  # optional
-          }
+logger = {  # 'filename': "rockettm.log",  # optional,
+    # is not defined print in console
+    'level': 10,  # optional
+    'stream': sys.stdout
+}
 
 # search @task in imports
 imports = ['examples.test1',
@@ -18,5 +22,6 @@ imports = ['examples.test1',
 # max_time (in seconds) (optional), int
 
 queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 1},
-          {'name': 'rocket2', 'concurrency': 1},
-          {'name': 'rocket3', 'concurrency': 2, 'max_time': 1}]
+          {'name': 'rocket2', 'durable': True, 'concurrency': 1},
+          {'name': 'rocket3', 'durable': True, 'concurrency': 2,
+           'max_time': 1}]

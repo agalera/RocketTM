@@ -1,5 +1,4 @@
-from pika import BlockingConnection, ConnectionParameters
-import json
+from kombu import Connection, Exchange, Queue
 import logging
 import uuid
 import traceback
@@ -13,16 +12,11 @@ class tasks(object):
     conn = False
     channel = False
 
+    # deprecated
     @staticmethod
     def connect(ip=None):
-        try:
-            logging.info("rabbitmq connect %s" % tasks.ip)
-            if ip:
-                tasks.ip = ip
-            tasks.conn = BlockingConnection(ConnectionParameters(tasks.ip))
-            tasks.channel = tasks.conn.channel()
-        except:
-            pass
+        if ip:
+            tasks.ip = ip
 
     @staticmethod
     def add_task(event, func, max_time=-1):
@@ -39,39 +33,31 @@ class tasks(object):
         return wrap_function
 
     @staticmethod
-    def send_task(queue, event, *args):
+    def send_task(queue_name, event, *args):
         _id = str(uuid.uuid4())
         args = list((_id,) + args)
-        logging.info("send task to queue %s, event %s" % (queue, event))
-        retries = 0
-        success = False
-        for retries in range(10):
-            try:
-                if (not tasks.channel or not tasks.conn or
-                        tasks.channel.is_closed or tasks.conn.is_closed):
-                    logging.error("connection is closed, try reconnect")
-                    tasks.connect()
-
-                if queue not in tasks.queues:
-                    tasks.channel.queue_declare(queue=queue, passive=True)
-                    tasks.queues.append(queue)
-
-                if tasks.channel.basic_publish(exchange='',
-                                               routing_key=queue,
-                                               body=json.dumps({'event': event,
-                                                                'args': args})):
-                    success = True
+        logging.info("send task to queue %s, event %s" % (queue_name, event))
+        exchange = Exchange(queue_name, 'direct', durable=True)
+        queue = Queue(queue_name, exchange=exchange, routing_key=queue_name)
+        print("antes del with")
+        with Connection('amqp://guest:guest@localhost//') as conn:
+            # produce
+            print("dentro")
+            producer = conn.Producer(serializer='json')
+            print("1")
+            for retry in range(10):
+                try:
+                    producer.publish({'event': event, 'args': args},
+                                     exchange=exchange,
+                                     routing_key=queue_name,
+                                     declare=[queue])
                     break
-                else:
-                    raise Exception("failed publish")
-            except:
-                logging.error(traceback.format_exc())
-                time.sleep(1)
-        if success:
-            logging.warning("send its ok!")
-            return _id
-        else:
-            raise Exception("it has not been possible to the request to the queue")
+                except:
+                    logging.error(traceback.format_exc())
+                    time.sleep(retry * 1.34)
+        logging.warning("send its ok!")
+        return _id
+
 
 # avoids having to import tasks
 connect = tasks.connect

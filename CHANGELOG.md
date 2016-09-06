@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.0.0 (2016-09-06)
+ - Migrate pika to kambu
+
 ## 1.0.16 (2016-09-06)
  - Fix ack
 

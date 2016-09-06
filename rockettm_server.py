@@ -2,8 +2,7 @@ import logging
 from multiprocessing import Process, Manager
 from rockettm import tasks
 import traceback
-import pika
-import json
+from kombu import Connection, Exchange, Queue
 import sys
 import os
 from timekiller import call
@@ -22,10 +21,9 @@ else:
         import settings
     except:
         exit("settings.py not found")
-try:
-    logging.basicConfig(**settings.logger)
-except:
-    pass
+
+logging.basicConfig(**settings.logger)
+
 
 try:
     callback_api = settings.callback_api
@@ -65,20 +63,17 @@ def worker(name, concurrency, durable=False, max_time=-1):
         p.join()
         return return_dict
 
-    def callback(channel, method, properties, body):
+    def callback(body, message):
         # py3 support
-        if isinstance(body, bytes):
-            body = body.decode('utf-8')
 
-        recv = json.loads(body)
-        logging.info("execute %s" % recv['event'])
-        if not recv['event'] in tasks.subs:
-            call_api({'_id': recv['args'][0],
+        logging.info("execute %s" % body['event'])
+        if not body['event'] in tasks.subs:
+            call_api({'_id': body['args'][0],
                       'result': 'task not defined',
                       'success': False})
             return False
 
-        for func, max_time2 in tasks.subs[recv['event']]:
+        for func, max_time2 in tasks.subs[body['event']]:
             logging.info("exec func: %s, timeout: %s" % (func, max_time2))
             if max_time2 != -1:
                 apply_max_time = max_time2
@@ -86,32 +81,36 @@ def worker(name, concurrency, durable=False, max_time=-1):
                 apply_max_time = max_time
 
             result = safe_call(call, func, apply_max_time,
-                               *recv['args'])
-            result['_id'] = recv['args'][0]
+                               *body['args'])
+            result['_id'] = body['args'][0]
             call_api(result)
             if not result['success']:
                 logging.error(result['result'])
 
+        message.ack()
+
     while True:
         try:
-            conn = pika.BlockingConnection(pika.ConnectionParameters(settings.ip))
-            channel = conn.channel()
-            logging.info("create queue: %s durable: %s" % (name, durable))
-            channel.queue_declare(queue=name, durable=durable)
-            channel.basic_qos(prefetch_count=1)
-            for method, properties, body in channel.consume(name):
-                try:
-                    channel.basic_ack(delivery_tag=method.delivery_tag)
-                    callback(channel, method, properties, body)
-                except:
-                    logging.error(traceback.format_exc())
+            with Connection('amqp://guest:guest@%s//' % settings.ip) as conn:
+                exchange = Exchange(name, 'direct', durable=durable)
+                queue = Queue(name=name,
+                              exchange=exchange,
+                              durable=durable, routing_key=name)
+                queue(conn).declare()
+                logging.info("create queue: %s durable: %s" % (name, durable))
+                with conn.Consumer(queue, callbacks=[callback]) as consumer:
+                    print("consumer", consumer)
+                    while True:
+                        conn.drain_events()
 
         except (KeyboardInterrupt, SystemExit):
             print("server stop!")
             break
 
         except:
-            logging.error("worker disconnect, try reconnect")
+            import traceback
+            logging.error(traceback.format_exc())
+            logging.error("connection loss, try reconnect")
             time.sleep(5)
 
 
