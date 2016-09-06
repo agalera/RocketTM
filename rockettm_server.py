@@ -55,6 +55,7 @@ def safe_worker(func, return_dict, *args, **kwargs):
         return_dict['result'] = traceback.format_exc()
         return_dict['success'] = False
 
+
 def worker(name, concurrency, durable=False, max_time=-1):
     def safe_call(func, *args, **kwargs):
         return_dict = Manager().dict()
@@ -71,28 +72,25 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
         recv = json.loads(body)
         logging.info("execute %s" % recv['event'])
-        try:
-            if not recv['event'] in tasks.subs:
-                call_api({'_id': recv['args'][0],
-                          'result': 'task not defined',
-                          'success': False})
-                return False
+        if not recv['event'] in tasks.subs:
+            call_api({'_id': recv['args'][0],
+                      'result': 'task not defined',
+                      'success': False})
+            return False
 
-            for func, max_time2 in tasks.subs[recv['event']]:
-                logging.info("exec func: %s, timeout: %s" % (func, max_time2))
-                if max_time2 != -1:
-                    apply_max_time = max_time2
-                else:
-                    apply_max_time = max_time
+        for func, max_time2 in tasks.subs[recv['event']]:
+            logging.info("exec func: %s, timeout: %s" % (func, max_time2))
+            if max_time2 != -1:
+                apply_max_time = max_time2
+            else:
+                apply_max_time = max_time
 
-                result = safe_call(call, func, apply_max_time,
-                                   *recv['args'])
-                result['_id'] = recv['args'][0]
-                call_api(result)
-                if not result['success']:
-                    logging.error(result['result'])
-        finally:
-            ch.basic_ack(delivery_tag=method.delivery_tag)
+            result = safe_call(call, func, apply_max_time,
+                               *recv['args'])
+            result['_id'] = recv['args'][0]
+            call_api(result)
+            if not result['success']:
+                logging.error(result['result'])
 
     while True:
         try:
