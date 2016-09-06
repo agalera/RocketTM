@@ -100,7 +100,11 @@ def worker(name, concurrency, durable=False, max_time=-1):
             channel.queue_declare(queue=name, durable=durable)
             channel.basic_qos(prefetch_count=1)
             for method, properties, body in channel.consume(name):
-                callback(channel, method, properties, body)
+                try:
+                    channel.basic_ack(delivery_tag=method.delivery_tag)
+                    callback(channel, method, properties, body)
+                except:
+                    logging.error(traceback.format_exc())
 
         except (KeyboardInterrupt, SystemExit):
             print("server stop!")
