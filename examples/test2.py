@@ -3,7 +3,7 @@ import time
 
 @task('function2')
 def function2(*args, **kwargs):
-    print("recv")
-    time.sleep(10*60)
-    print("finish")
+    for x in range(60*60*10):
+        print(x)
+        time.sleep(1)
     return True

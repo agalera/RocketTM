@@ -88,6 +88,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
                 logging.error(result['result'])
 
         message.ack()
+        return True
 
     while True:
         try:

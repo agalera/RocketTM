@@ -10,13 +10,16 @@ class tasks(object):
     queues = []
     ip = "localhost"
     conn = False
-    channel = False
+    producer = False
 
     # deprecated
     @staticmethod
     def connect(ip=None):
         if ip:
             tasks.ip = ip
+        logging.warning('reconnect amqp')
+        tasks.conn = Connection('amqp://guest:guest@%s//' % tasks.ip)
+        tasks.producer = tasks.conn.Producer(serializer='json')
 
     @staticmethod
     def add_task(event, func, max_time=-1):
@@ -39,19 +42,20 @@ class tasks(object):
         logging.info("send task to queue %s, event %s" % (queue_name, event))
         exchange = Exchange(queue_name, 'direct', durable=True)
         queue = Queue(queue_name, exchange=exchange, routing_key=queue_name)
-        with Connection('amqp://guest:guest@%s//' % tasks.ip) as conn:
-            # produce
-            producer = conn.Producer(serializer='json')
-            for retry in range(10):
-                try:
-                    producer.publish({'event': event, 'args': args},
-                                     exchange=exchange,
-                                     routing_key=queue_name,
-                                     declare=[queue])
-                    break
-                except:
-                    logging.error(traceback.format_exc())
-                    time.sleep(retry * 1.34)
+        for retry in range(10):
+            if not tasks.conn or not tasks.conn.connected:
+                tasks.connect()
+            try:
+                tasks.producer.publish({'event': event, 'args': args},
+                                        exchange=exchange,
+                                        routing_key=queue_name,
+                                        declare=[queue])
+                break
+            except:
+                import ipdb; ipdb.set_trace()
+                logging.error(traceback.format_exc())
+                time.sleep(retry * 1.34)
+
         logging.warning("send its ok!")
         return _id
 
