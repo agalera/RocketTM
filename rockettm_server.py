@@ -99,7 +99,9 @@ def worker(name, concurrency, durable=False, max_time=-1):
                               durable=durable, routing_key=name)
                 queue(conn).declare()
                 logging.info("create queue: %s durable: %s" % (name, durable))
-                with conn.Consumer(queue, callbacks=[callback]) as consumer:
+                channel = conn.channel()
+                channel.basic_qos(prefetch_size=0, prefetch_count=1, a_global=False)
+                with conn.Consumer(queue, callbacks=[callback], channel=channel) as consumer:
                     logging.info(consumer)
                     while True:
                         conn.drain_events()

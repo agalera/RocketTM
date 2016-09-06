@@ -1,4 +1,10 @@
 # CHANGELOG
+## 2.0.2 (2016-09-07)
+ - Change prefetch to 1
+
+## 2.0.1 (2016-09-06)
+ - Reuse connection in send_tasks
+
 ## 2.0.0 (2016-09-06)
  - Migrate pika to kambu
 
