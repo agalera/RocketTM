@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.0.3 (2016-09-07)
+ - prevent relaunch finish task
+
 ## 2.0.2 (2016-09-07)
  - Change prefetch to 1
 

@@ -21,7 +21,7 @@ imports = ['examples.test1',
 # durable (optional), boolean
 # max_time (in seconds) (optional), int
 
-queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 1},
-          {'name': 'rocket2', 'durable': True, 'concurrency': 1},
-          {'name': 'rocket3', 'durable': True, 'concurrency': 2,
-           'max_time': 1}]
+queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 1}]
+#          {'name': 'rocket2', 'durable': True, 'concurrency': 1},
+#          {'name': 'rocket3', 'durable': True, 'concurrency': 2,
+#           'max_time': 1}]

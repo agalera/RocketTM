@@ -64,7 +64,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
         return return_dict
 
     def callback(body, message):
-        # py3 support
+        message.ack()
 
         logging.info("execute %s" % body['event'])
         if not body['event'] in tasks.subs:
@@ -87,7 +87,6 @@ def worker(name, concurrency, durable=False, max_time=-1):
             if not result['success']:
                 logging.error(result['result'])
 
-        message.ack()
         return True
 
     while True:
