@@ -52,7 +52,6 @@ class tasks(object):
                                         declare=[queue])
                 break
             except:
-                import ipdb; ipdb.set_trace()
                 logging.error(traceback.format_exc())
                 time.sleep(retry * 1.34)
 
