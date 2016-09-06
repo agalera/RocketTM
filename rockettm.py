@@ -39,12 +39,9 @@ class tasks(object):
         logging.info("send task to queue %s, event %s" % (queue_name, event))
         exchange = Exchange(queue_name, 'direct', durable=True)
         queue = Queue(queue_name, exchange=exchange, routing_key=queue_name)
-        print("antes del with")
-        with Connection('amqp://guest:guest@localhost//') as conn:
+        with Connection('amqp://guest:guest@%s//' % tasks.ip) as conn:
             # produce
-            print("dentro")
             producer = conn.Producer(serializer='json')
-            print("1")
             for retry in range(10):
                 try:
                     producer.publish({'event': event, 'args': args},

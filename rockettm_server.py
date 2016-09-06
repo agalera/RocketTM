@@ -99,12 +99,12 @@ def worker(name, concurrency, durable=False, max_time=-1):
                 queue(conn).declare()
                 logging.info("create queue: %s durable: %s" % (name, durable))
                 with conn.Consumer(queue, callbacks=[callback]) as consumer:
-                    print("consumer", consumer)
+                    logging.info(consumer)
                     while True:
                         conn.drain_events()
 
         except (KeyboardInterrupt, SystemExit):
-            print("server stop!")
+            logging.warning("server stop!")
             break
 
         except:
