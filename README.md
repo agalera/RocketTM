@@ -1,5 +1,4 @@
 
-[![PypiDownloads](https://img.shields.io/pypi/dm/rockettm.svg)](https://pypi.python.org/pypi/rockettm)
 [![pythonversions](https://img.shields.io/pypi/pyversions/rockettm.svg)](https://pypi.python.org/pypi/rockettm)
 
 # Rocket task manager
