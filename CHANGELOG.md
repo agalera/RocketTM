@@ -1,4 +1,8 @@
 # CHANGELOG
+## 2.0.4 (2016-09-07)
+ - implemented heartbeat
+ - fix ack failed for loss connection
+
 ## 2.0.3 (2016-09-07)
  - prevent relaunch finish task
 
