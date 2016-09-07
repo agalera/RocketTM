@@ -9,7 +9,6 @@ from timekiller import call
 import importlib
 import requests
 import time
-from threading import Thread
 
 
 if len(sys.argv) == 2:
@@ -65,6 +64,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
         return return_dict
 
     def callback(body, message):
+        message.ack()
         logging.info("execute %s" % body['event'])
         if not body['event'] in tasks.subs:
             call_api({'_id': body['args'][0],
@@ -85,54 +85,35 @@ def worker(name, concurrency, durable=False, max_time=-1):
             call_api(result)
             if not result['success']:
                 logging.error(result['result'])
-        for retry in range(10):
-            try:
-                message.ack()
-                break
-            except:
-                logging.error("ack failed")
-                time.sleep(retry*1.34)
         return True
 
-    def monitor_heartbeat(conn):
-        rate = conn.heartbeat
-        while True:
-            try:
-                conn.heartbeat_check(rate)
-                time.sleep(rate/2.0)
-            except (KeyboardInterrupt, SystemExit):
-                logging.warning("monitor heartbeat stop")
-                break
-            except:
-                logging.error(traceback.format_exc())
-                time.sleep(1)
- 
-    with Connection('amqp://guest:guest@%s//' % settings.ip, heartbeat=60) as conn:
-        t = Thread(target=monitor_heartbeat, args=(conn,))
-        t.setDaemon(True)
-        t.start()
-        exchange = Exchange(name, 'direct', durable=durable)
-        queue = Queue(name=name,
-                      exchange=exchange,
-                      durable=durable, routing_key=name)
-        queue(conn).declare()
-        logging.info("create queue: %s durable: %s" % (name, durable))
-        channel = conn.channel()
-        channel.basic_qos(prefetch_size=0, prefetch_count=1, a_global=False)
-        with conn.Consumer(queue, callbacks=[callback], channel=channel) as consumer:
-            logging.info(consumer)
-            while True:
-                try:
-                    conn.drain_events()
+    while True:
+        try:
+            with Connection('amqp://guest:guest@%s//' % settings.ip) as conn:
+                conn.ensure_connection()
+                exchange = Exchange(name, 'direct', durable=durable)
+                queue = Queue(name=name,
+                              exchange=exchange,
+                              durable=durable, routing_key=name)
+                queue(conn).declare()
+                logging.info("create queue: %s durable: %s" % (name, durable))
+                channel = conn.channel()
+                channel.basic_qos(prefetch_size=0, prefetch_count=1,
+                                  a_global=False)
+                with conn.Consumer(queue, callbacks=[callback],
+                                   channel=channel) as consumer:
+                    while True:
+                        logging.info(consumer)
+                        conn.drain_events()
 
-                except (KeyboardInterrupt, SystemExit):
-                    logging.warning("server stop!")
-                    break
+        except (KeyboardInterrupt, SystemExit):
+            logging.warning("server stop!")
+            break
 
-                except:
-                   logging.error(traceback.format_exc())
-                   logging.error("connection loss, try reconnect")
-                   time.sleep(5)
+        except:
+            # logging.error(traceback.format_exc())
+            logging.error("connection loss, try reconnect")
+            time.sleep(5)
 
 
 def main():

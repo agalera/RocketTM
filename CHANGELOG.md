@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.0.5 (2016-09-07)
+ - Revert heartbeat
+
 ## 2.0.4 (2016-09-07)
  - implemented heartbeat
  - fix ack failed for loss connection
