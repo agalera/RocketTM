@@ -41,15 +41,16 @@ class tasks(object):
         args = list((_id,) + args)
         logging.info("send task to queue %s, event %s" % (queue_name, event))
         exchange = Exchange(queue_name, 'direct', durable=True)
-        queue = Queue(queue_name, exchange=exchange, routing_key=queue_name)
+        queue = Queue(queue_name, exchange=exchange, routing_key=queue_name,
+                      durable=True)
         for retry in range(10):
             if not tasks.conn or not tasks.conn.connected:
                 tasks.connect()
             try:
                 tasks.producer.publish({'event': event, 'args': args},
-                                        exchange=exchange,
-                                        routing_key=queue_name,
-                                        declare=[queue])
+                                       exchange=exchange,
+                                       routing_key=queue_name,
+                                       declare=[queue])
                 break
             except:
                 logging.error(traceback.format_exc())
