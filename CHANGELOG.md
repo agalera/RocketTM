@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.0.6 (2016-09-20)
+ - added support kwargs in tasks
+
 ## 2.0.5 (2016-09-07)
  - Revert heartbeat
 

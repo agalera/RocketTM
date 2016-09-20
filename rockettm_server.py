@@ -80,7 +80,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
                 apply_max_time = max_time
 
             result = safe_call(call, func, apply_max_time,
-                               *body['args'])
+                               *body['args'], **body['kwargs'])
             result['_id'] = body['args'][0]
             call_api(result)
             if not result['success']:

@@ -56,7 +56,7 @@ logger = {'filename': "rockettm.log",  # optional,
 # send task
 from rockettm import send_task
 
-send_task("queue_name", "name_task", "arg1", ["arg2", "2"], {'args': 3}, ('arg', 4))
+send_task("queue_name", "name_task", "arg1", ["arg2", "2"], {'args': 3}, ('arg', 4), example="ok")
 
 ```
 

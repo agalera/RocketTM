@@ -36,7 +36,7 @@ class tasks(object):
         return wrap_function
 
     @staticmethod
-    def send_task(queue_name, event, *args):
+    def send_task(queue_name, event, *args, **kwargs):
         _id = str(uuid.uuid4())
         args = list((_id,) + args)
         logging.info("send task to queue %s, event %s" % (queue_name, event))
@@ -47,7 +47,7 @@ class tasks(object):
             if not tasks.conn or not tasks.conn.connected:
                 tasks.connect()
             try:
-                tasks.producer.publish({'event': event, 'args': args},
+                tasks.producer.publish({'event': event, 'args': args, 'kwargs': kwargs},
                                        exchange=exchange,
                                        routing_key=queue_name,
                                        declare=[queue])
