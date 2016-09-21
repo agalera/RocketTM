@@ -66,9 +66,12 @@ def worker(name, concurrency, durable=False, max_time=-1):
     def callback(body, message):
         message.ack()
         logging.info("execute %s" % body['event'])
+        _id = body['args'][0]
+        call_api({'_id': _id, 'status': 'processing'})
         if not body['event'] in tasks.subs:
-            call_api({'_id': body['args'][0],
+            call_api({'_id': _id,
                       'result': 'task not defined',
+                      'status': 'finished',
                       'success': False})
             return False
 
@@ -81,7 +84,8 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
             result = safe_call(call, func, apply_max_time,
                                *body['args'])
-            result['_id'] = body['args'][0]
+            result['_id'] = _id
+            result['status'] = 'finished'
             call_api(result)
             if not result['success']:
                 logging.error(result['result'])
@@ -123,6 +127,7 @@ def main():
             logging.info("start process worker: %s queue: %s" % (worker,
                                                                  queue))
             p.start()
+
 
 if __name__ == "__main__":
     main()
