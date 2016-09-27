@@ -1,4 +1,13 @@
 # CHANGELOG
+## 2.1.1 (2016-09-21)
+- clean code
+
+## 2.1.0 (2016-09-21)
+- call api in init tasks and return status task
+
+## 2.0.6 (2016-09-20)
+ - added support kwargs in tasks
+
 ## 2.0.5 (2016-09-07)
  - Revert heartbeat
 
@@ -39,7 +48,7 @@
  - fix inmortal server
 
 ## 1.0.4 (2016-08-25)
- - run tasks in safe and asolated proccess
+ - run tasks in safe and isolated proccess
 
 ## 1.0.3 (2016-08-25)
  - Solved multiple errors with disconnection with RabbitMQ
@@ -62,7 +71,6 @@
  - py3 compatibility
  - fix hardcoding durable
  - ignore not exists logger config
-
 
 ## 0.2.5 (2016-07-15)
  - py3 compatibility

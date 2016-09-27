@@ -37,28 +37,29 @@ tasks.ip = settings.ip
 
 
 def call_api(json):
-    if not callback_api:
-        return
-    try:
-        requests.post(callback_api, json=json)
-    except:
-        pass
+    if callback_api:
+        try:
+            requests.post(callback_api, json=json)
+        except:
+            pass
 
 
-def safe_worker(func, return_dict, *args, **kwargs):
+def safe_worker(func, return_dict, apply_max_time, body):
     try:
-        return_dict['result'] = func(*args, **kwargs)
+        return_dict['result'] = call(func, apply_max_time,
+                                     *body['args'], **body['kwargs'])
         return_dict['success'] = True
     except:
         return_dict['result'] = traceback.format_exc()
         return_dict['success'] = False
+        logging.error(return_dict['result'])
 
 
 def worker(name, concurrency, durable=False, max_time=-1):
-    def safe_call(func, *args, **kwargs):
+    def safe_call(func, apply_max_time, body):
         return_dict = Manager().dict()
-        args = (func, return_dict) + args
-        p = Process(target=safe_worker, args=args, kwargs=kwargs)
+        p = Process(target=safe_worker, args=(func, return_dict,
+                                              apply_max_time, body))
         p.start()
         p.join()
         return return_dict
@@ -75,20 +76,19 @@ def worker(name, concurrency, durable=False, max_time=-1):
                       'success': False})
             return False
 
+        result = []
         for func, max_time2 in tasks.subs[body['event']]:
             logging.info("exec func: %s, timeout: %s" % (func, max_time2))
             if max_time2 != -1:
                 apply_max_time = max_time2
             else:
                 apply_max_time = max_time
+            result.append(dict(safe_call(func, apply_max_time,
+                                         body)))
 
-            result = safe_call(call, func, apply_max_time,
-                               *body['args'])
-            result['_id'] = _id
-            result['status'] = 'finished'
-            call_api(result)
-            if not result['success']:
-                logging.error(result['result'])
+        success = not any(r['success'] is False for r in result)
+        call_api({'_id': _id, 'status': 'finished',
+                  'success': success, 'result': result})
         return True
 
     while True:
