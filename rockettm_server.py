@@ -121,13 +121,17 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
 
 def main():
+    list_process = []
     for queue in settings.queues:
         for x in range(queue['concurrency']):
             p = Process(target=worker, kwargs=queue)
             logging.info("start process worker: %s queue: %s" % (worker,
                                                                  queue))
+            list_process.append(p)
             p.start()
 
+    for p in list_process:
+        p.join()
 
 if __name__ == "__main__":
     main()
