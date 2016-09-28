@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.1.2 (2016-09-28)
+- Fix dead MainThread in Python 3.4.2
+
 ## 2.1.1 (2016-09-21)
 - clean code
 
