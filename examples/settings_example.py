@@ -13,7 +13,8 @@ logger = {  # 'filename': "rockettm.log",  # optional,
 # search @task in imports
 imports = ['examples.test1',
            'examples.test2',
-           'examples.test3']
+           'examples.test3',
+           'examples.test4']
 
 # support params
 # name (mandatory), string
