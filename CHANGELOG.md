@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.1.3 (2016-09-28)
+- Supported basicevents
+
 ## 2.1.1 (2016-09-21)
 - clean code
 

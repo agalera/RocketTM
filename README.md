@@ -130,3 +130,12 @@ Add manual task
 - connect(ip_or_domain)
 
 connects to another server other than localhost
+
+## Basicevents
+
+rockettm currently used basicevents for noticificaciones the api. You can use basicevents as its official documentation *
+
+* Do not need to run (), rockettm up a common process for all workers
+
+https://github.com/kianxineki/basicevents
+
