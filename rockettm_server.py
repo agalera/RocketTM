@@ -9,6 +9,7 @@ from timekiller import call
 import importlib
 import requests
 import time
+from basicevents import run, send, subscribe
 
 
 if len(sys.argv) == 2:
@@ -36,6 +37,7 @@ for mod in settings.imports:
 tasks.ip = settings.ip
 
 
+@subscribe('api')
 def call_api(json):
     if callback_api:
         try:
@@ -68,12 +70,12 @@ def worker(name, concurrency, durable=False, max_time=-1):
         message.ack()
         logging.info("execute %s" % body['event'])
         _id = body['args'][0]
-        call_api({'_id': _id, 'status': 'processing'})
+        send('api', {'_id': _id, 'status': 'processing'})
         if not body['event'] in tasks.subs:
-            call_api({'_id': _id,
-                      'result': 'task not defined',
-                      'status': 'finished',
-                      'success': False})
+            send('api', {'_id': _id,
+                         'result': 'task not defined',
+                         'status': 'finished',
+                         'success': False})
             return False
 
         result = []
@@ -87,8 +89,8 @@ def worker(name, concurrency, durable=False, max_time=-1):
                                          body)))
 
         success = not any(r['success'] is False for r in result)
-        call_api({'_id': _id, 'status': 'finished',
-                  'success': success, 'result': result})
+        send('api', {'_id': _id, 'status': 'finished',
+                     'success': success, 'result': result})
         return True
 
     while True:
@@ -121,6 +123,8 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
 
 def main():
+    # start basicevents
+    run()
     list_process = []
     for queue in settings.queues:
         for x in range(queue['concurrency']):

@@ -1,4 +1,11 @@
 # CHANGELOG
+
+## 2.1.4 (2016-09-29)
+- Support custom id
+
+## 2.1.3 (2016-09-28)
+- Supported basicevents
+
 ## 2.1.2 (2016-09-28)
 - Fix dead MainThread in Python 3.4.2
 

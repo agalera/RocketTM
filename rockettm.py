@@ -37,7 +37,11 @@ class tasks(object):
 
     @staticmethod
     def send_task(queue_name, event, *args, **kwargs):
-        _id = str(uuid.uuid4())
+        if 'rocket_id' in kwargs:
+            rocket_id = kwargs.pop('rocket_id')
+        else:
+            _id = str(uuid.uuid4())
+
         args = list((_id,) + args)
         logging.info("send task to queue %s, event %s" % (queue_name, event))
         exchange = Exchange(queue_name, 'direct', durable=True)
