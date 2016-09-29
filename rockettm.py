@@ -38,7 +38,7 @@ class tasks(object):
     @staticmethod
     def send_task(queue_name, event, *args, **kwargs):
         if 'rocket_id' in kwargs:
-            rocket_id = kwargs.pop('rocket_id')
+            _id = kwargs.pop('rocket_id')
         else:
             _id = str(uuid.uuid4())
 

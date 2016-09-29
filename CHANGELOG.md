@@ -1,4 +1,6 @@
 # CHANGELOG
+## 2.1.5 (2016-09-29)
+- Fix name var
 
 ## 2.1.4 (2016-09-29)
 - Support custom id
