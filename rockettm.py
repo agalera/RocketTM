@@ -47,6 +47,8 @@ class tasks(object):
         exchange = Exchange(queue_name, 'direct', durable=True)
         queue = Queue(queue_name, exchange=exchange, routing_key=queue_name,
                       durable=True)
+
+        send_ok = False
         for retry in range(10):
             if not tasks.conn or not tasks.conn.connected:
                 tasks.connect()
@@ -56,13 +58,17 @@ class tasks(object):
                                        exchange=exchange,
                                        routing_key=queue_name,
                                        declare=[queue])
+                send_ok = True
                 break
             except:
                 logging.error(traceback.format_exc())
                 time.sleep(retry * 1.34)
-
-        logging.warning("send its ok!")
-        return _id
+        if send_ok:
+            logging.warning("send its ok!")
+            return _id
+        else:
+            logging.error("send Failed")
+            return False
 
 
 # avoids having to import tasks

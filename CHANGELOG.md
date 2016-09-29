@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.1.6 (2016-09-29)
+- send return False with failed send
+
 ## 2.1.5 (2016-09-29)
 - Fix name var
 
