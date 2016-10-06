@@ -2,7 +2,10 @@ import sys
 
 
 ip = "localhost"
-port = 5672
+port = 61613
+
+user = 'guest'
+password = 'guest'
 
 logger = {  # 'filename': "rockettm.log",  # optional,
     # is not defined print in console
@@ -22,7 +25,7 @@ imports = ['examples.test1',
 # durable (optional), boolean
 # max_time (in seconds) (optional), int
 
-queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 1}]
+queues = [{'name': 'rocket1', 'durable': True, 'concurrency': 10}]
 #          {'name': 'rocket2', 'durable': True, 'concurrency': 1},
 #          {'name': 'rocket3', 'durable': True, 'concurrency': 2,
 #           'max_time': 1}]
