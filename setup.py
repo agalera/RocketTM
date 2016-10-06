@@ -40,7 +40,7 @@ setup(
     url='https://github.com/kianxineki/rockettm',
     py_modules=['rockettm', 'rockettm_server'],
     include_package_data=True,
-    install_requires=['amqp', 'kombu', 'timekiller', 'basicevents'],
+    install_requires=['stomp.py', 'timekiller', 'basicevents'],
     license="GPL",
     zip_safe=False,
     keywords='rockettm',
