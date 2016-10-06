@@ -1,25 +1,31 @@
-from kombu import Connection, Exchange, Queue
+from stompest.config import StompConfig
+from stompest.sync import Stomp
 import logging
 import uuid
 import traceback
 import time
+import json
 
 
 class tasks(object):
     subs = {}
     queues = []
     ip = "localhost"
+    port = 61613
     conn = False
-    producer = False
 
     # deprecated
     @staticmethod
-    def connect(ip=None):
+    def connect(ip=None, port=None):
         if ip:
             tasks.ip = ip
+        if port:
+            tasks.port = port
+            
         logging.warning('reconnect amqp')
-        tasks.conn = Connection('amqp://guest:guest@%s//' % tasks.ip)
-        tasks.producer = tasks.conn.Producer(serializer='json')
+        tasks.conn = Stomp(StompConfig('tcp://%s:%s' % (tasks.ip,
+                                                        tasks.port)))
+        tasks.conn.connect()
 
     @staticmethod
     def add_task(event, func, max_time=-1):
@@ -44,20 +50,15 @@ class tasks(object):
 
         args = list((_id,) + args)
         logging.info("send task to queue %s, event %s" % (queue_name, event))
-        exchange = Exchange(queue_name, 'direct', durable=True)
-        queue = Queue(queue_name, exchange=exchange, routing_key=queue_name,
-                      durable=True)
 
         send_ok = False
         for retry in range(10):
-            if not tasks.conn or not tasks.conn.connected:
+            if not tasks.conn or tasks.conn.session.state == 'disconnected':
                 tasks.connect()
             try:
-                tasks.producer.publish({'event': event, 'args': args,
-                                        'kwargs': kwargs},
-                                       exchange=exchange,
-                                       routing_key=queue_name,
-                                       declare=[queue])
+                tasks.conn.send(queue_name,
+                                json.dumps({'event': event, 'args': args,
+                                            'kwargs': kwargs}).encode())
                 send_ok = True
                 break
             except:

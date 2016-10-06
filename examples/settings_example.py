@@ -2,7 +2,7 @@ import sys
 
 
 ip = "localhost"
-port = 5672
+port = 61613
 
 logger = {  # 'filename': "rockettm.log",  # optional,
     # is not defined print in console

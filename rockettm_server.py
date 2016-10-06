@@ -2,7 +2,9 @@ import logging
 from multiprocessing import Process, Manager
 from rockettm import tasks
 import traceback
-from kombu import Connection, Exchange, Queue
+from stompest.config import StompConfig
+from stompest.protocol import StompSpec
+from stompest.sync import Stomp
 import sys
 import os
 from timekiller import call
@@ -10,6 +12,7 @@ import importlib
 import requests
 import time
 from basicevents import run, send, subscribe
+import json
 
 
 if len(sys.argv) == 2:
@@ -34,7 +37,7 @@ except:
 for mod in settings.imports:
     importlib.import_module(mod)
 
-tasks.ip = settings.ip
+tasks.ip, tasks.port = settings.ip, settings.port
 
 
 @subscribe('api')
@@ -66,8 +69,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
         p.join()
         return return_dict
 
-    def callback(body, message):
-        message.ack()
+    def callback(body):
         logging.info("execute %s" % body['event'])
         _id = body['args'][0]
         send('api', {'_id': _id, 'status': 'processing'})
@@ -95,25 +97,17 @@ def worker(name, concurrency, durable=False, max_time=-1):
 
     while True:
         try:
-            with Connection('amqp://guest:guest@%s//' % settings.ip) as conn:
-                conn.ensure_connection()
-                exchange = Exchange(name, 'direct', durable=durable)
-                queue = Queue(name=name,
-                              exchange=exchange,
-                              durable=durable, routing_key=name)
-                queue(conn).declare()
-                logging.info("create queue: %s durable: %s" % (name, durable))
-                channel = conn.channel()
-                channel.basic_qos(prefetch_size=0, prefetch_count=1,
-                                  a_global=False)
-                with conn.Consumer(queue, callbacks=[callback],
-                                   channel=channel) as consumer:
-                    while True:
-                        logging.info(consumer)
-                        conn.drain_events()
+            client = Stomp(StompConfig('tcp://%s:%s' % (tasks.ip, tasks.port)))
+            client.connect()
+            client.subscribe("/queue/%s" % name, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+            while True:
+                frame = client.receiveFrame()
+                callback(json.loads(frame.body.decode('utf-8')))
+                client.ack(frame)
 
         except (KeyboardInterrupt, SystemExit):
             logging.warning("server stop!")
+            client.disconnect()
             break
 
         except:

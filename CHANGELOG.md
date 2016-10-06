@@ -1,4 +1,7 @@
 # CHANGELOG
+## 3.0.0 (2016-10-06)
+- Change support amqp protocol to stomp
+
 ## 2.1.6 (2016-09-29)
 - send return False with failed send
 

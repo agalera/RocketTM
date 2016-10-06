@@ -32,7 +32,7 @@ except:
 
 setup(
     name='rockettm',
-    version='2.1.6',
+    version='3.0.0',
     description='Rocket task manager',
     long_description=readme + '\n\n' + changelog,
     author='Alberto Galera Jimenez',
@@ -40,7 +40,7 @@ setup(
     url='https://github.com/kianxineki/rockettm',
     py_modules=['rockettm', 'rockettm_server'],
     include_package_data=True,
-    install_requires=['amqp', 'kombu', 'timekiller', 'basicevents'],
+    install_requires=['stompest', 'timekiller', 'basicevents'],
     license="GPL",
     zip_safe=False,
     keywords='rockettm',
