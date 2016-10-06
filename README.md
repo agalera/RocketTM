@@ -4,6 +4,14 @@
 # Rocket task manager
 Asynchronous task manager in python
 
+rockettm uses the protocol stomp
+
+RabbitMQ:
+
+```
+rabbitmq-plugins enable rabbitmq_stomp
+```
+
 ## Install
 
 ```bash
