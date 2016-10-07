@@ -109,7 +109,8 @@ def worker(name, concurrency, durable=False, max_time=-1):
             conn.start()
             conn.connect(settings.user, settings.password, wait=True)
             conn.subscribe(destination="/queue/%s" % name,
-                           id=1, ack='client-individual')
+                           id=1, ack='client-individual',
+                           headers={'prefetch-count': 1})
             while conn.is_connected():
                 time.sleep(10)
         except (KeyboardInterrupt, SystemExit):
