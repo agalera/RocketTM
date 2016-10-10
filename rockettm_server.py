@@ -99,7 +99,8 @@ def worker(name, concurrency, durable=False, max_time=-1):
         try:
             client = Stomp(StompConfig('tcp://%s:%s' % (tasks.ip, tasks.port)))
             client.connect()
-            client.subscribe("/queue/%s" % name, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+            client.subscribe("/queue/%s" % name, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL,
+                                                  'prefetch-count': 1})
             while True:
                 frame = client.receiveFrame()
                 callback(json.loads(frame.body.decode('utf-8')))
