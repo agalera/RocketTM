@@ -41,9 +41,9 @@ tasks.ip = settings.ip
 def call_api(json):
     if callback_api:
         try:
-            requests.post(callback_api, json=json)
+            return requests.post(callback_api, json=json, timeout=10)
         except:
-            pass
+            logging.error(traceback.format_exc())
 
 
 def safe_worker(func, return_dict, apply_max_time, body):
@@ -117,7 +117,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
             break
 
         except:
-            # logging.error(traceback.format_exc())
+            logging.error(traceback.format_exc())
             logging.error("connection loss, try reconnect")
             time.sleep(5)
 
@@ -134,8 +134,14 @@ def main():
             list_process.append(p)
             p.start()
 
-    for p in list_process:
-        p.join()
+    try:
+        for p in list_process:
+            p.join()
+    except:
+        logging.info("stop")
+    finally:
+        send("STOP")
+
 
 if __name__ == "__main__":
     main()
