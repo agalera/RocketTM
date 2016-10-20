@@ -1,4 +1,10 @@
 # CHANGELOG
+## 2.1.10 (2016-10-20)
+- Clean code
+
+## 2.1.9 (2016-10-19)
+- prevent infinite callback
+
 ## 2.1.6 (2016-09-29)
 - send return False with failed send
 

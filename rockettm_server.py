@@ -57,8 +57,15 @@ def safe_worker(func, return_dict, apply_max_time, body):
         logging.error(return_dict['result'])
 
 
-def worker(name, concurrency, durable=False, max_time=-1):
-    def safe_call(func, apply_max_time, body):
+class Worker(Process):
+    def __init__(self, name, concurrency, durable=False, max_time=-1):
+        self.queue_name = name
+        self.concurrency = concurrency
+        self.durable = durable
+        self.max_time = max_time
+        super(Worker, self).__init__()
+
+    def safe_call(self, func, apply_max_time, body):
         return_dict = Manager().dict()
         p = Process(target=safe_worker, args=(func, return_dict,
                                               apply_max_time, body))
@@ -66,7 +73,7 @@ def worker(name, concurrency, durable=False, max_time=-1):
         p.join()
         return return_dict
 
-    def callback(body, message):
+    def callback(self, body, message):
         message.ack()
         logging.info("execute %s" % body['event'])
         _id = body['args'][0]
@@ -84,42 +91,45 @@ def worker(name, concurrency, durable=False, max_time=-1):
             if max_time2 != -1:
                 apply_max_time = max_time2
             else:
-                apply_max_time = max_time
-            result.append(dict(safe_call(func, apply_max_time,
-                                         body)))
+                apply_max_time = self.max_time
+            result.append(dict(self.safe_call(func, apply_max_time, body)))
 
         success = not any(r['success'] is False for r in result)
         send('api', {'_id': _id, 'status': 'finished',
                      'success': success, 'result': result})
         return True
 
-    while True:
-        try:
-            with Connection('amqp://guest:guest@%s//' % settings.ip) as conn:
-                conn.ensure_connection()
-                exchange = Exchange(name, 'direct', durable=durable)
-                queue = Queue(name=name,
-                              exchange=exchange,
-                              durable=durable, routing_key=name)
-                queue(conn).declare()
-                logging.info("create queue: %s durable: %s" % (name, durable))
-                channel = conn.channel()
-                channel.basic_qos(prefetch_size=0, prefetch_count=1,
-                                  a_global=False)
-                with conn.Consumer(queue, callbacks=[callback],
-                                   channel=channel) as consumer:
-                    while True:
-                        logging.info(consumer)
-                        conn.drain_events()
+    def run(self):
+        while True:
+            try:
+                print("self", self)
+                with Connection('amqp://guest:guest@%s//' % settings.ip) as conn:
+                    conn.ensure_connection()
+                    exchange = Exchange(self.queue_name, 'direct',
+                                        durable=self.durable)
+                    queue = Queue(name=self.queue_name,
+                                  exchange=exchange,
+                                  durable=self.durable, routing_key=self.queue_name)
+                    queue(conn).declare()
+                    logging.info("create queue: %s durable: %s" %
+                                 (self.queue_name, self.durable))
+                    channel = conn.channel()
+                    channel.basic_qos(prefetch_size=0, prefetch_count=1,
+                                      a_global=False)
+                    with conn.Consumer(queue, callbacks=[self.callback],
+                                       channel=channel) as consumer:
+                        while True:
+                            logging.info(consumer)
+                            conn.drain_events()
 
-        except (KeyboardInterrupt, SystemExit):
-            logging.warning("server stop!")
-            break
+            except (KeyboardInterrupt, SystemExit):
+                logging.warning("server stop!")
+                break
 
-        except:
-            logging.error(traceback.format_exc())
-            logging.error("connection loss, try reconnect")
-            time.sleep(5)
+            except:
+                logging.error(traceback.format_exc())
+                logging.error("connection loss, try reconnect")
+                time.sleep(5)
 
 
 def main():
@@ -128,8 +138,8 @@ def main():
     list_process = []
     for queue in settings.queues:
         for x in range(queue['concurrency']):
-            p = Process(target=worker, kwargs=queue)
-            logging.info("start process worker: %s queue: %s" % (worker,
+            p = Worker(**queue)
+            logging.info("start process worker: %s queue: %s" % (p,
                                                                  queue))
             list_process.append(p)
             p.start()
