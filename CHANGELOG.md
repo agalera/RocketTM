@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.1.11 (2016-12-12)
+- Fix dependencies conflict
+
 ## 2.1.11 (2016-11-02)
 - Fix dependencies conflict
 
