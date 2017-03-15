@@ -28,7 +28,12 @@ logging.basicConfig(**settings.logger)
 for mod in settings.imports:
     importlib.import_module(mod)
 
+
 tasks.ip = settings.RABBITMQ_IP
+
+
+if not hasattr(settings, 'ROCKETTM_CALLBACK'):
+    settings.ROCKETTM_CALLBACK = True
 
 
 @subscribe('results')
@@ -67,12 +72,14 @@ class Worker(Process):
         message.ack()
         logging.info("execute %s" % body['event'])
         _id = body['args'][0]
-        send('results', {'_id': _id, 'status': 'processing'})
+        if settings.ROCKETTM_CALLBACK:
+            send('results', {'_id': _id, 'status': 'processing'})
         if not body['event'] in tasks.subs:
-            send('results', {'_id': _id,
-                             'result': 'task not defined',
-                             'status': 'finished',
-                             'success': False})
+            if settings.ROCKETTM_CALLBACK:
+                send('results', {'_id': _id,
+                                 'result': 'task not defined',
+                                 'status': 'finished',
+                                 'success': False})
             return False
 
         result = []

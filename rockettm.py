@@ -64,7 +64,7 @@ class tasks(object):
                 logging.error(traceback.format_exc())
                 time.sleep(retry * 1.34)
         if send_ok:
-            logging.warning("send its ok!")
+            logging.info("send ok!")
             return _id
         else:
             logging.error("send Failed")
