@@ -1,4 +1,9 @@
 # CHANGELOG
+## 2.2.0 (2017-03-18)
+- callback is optional
+- return callback to rabbitmq (queue results)
+- Support return other results to basicevents (send("results", "type", "data"))
+
 ## 2.1.11 (2016-12-12)
 - Fix dependencies conflict
 
