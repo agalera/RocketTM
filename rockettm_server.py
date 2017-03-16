@@ -145,8 +145,6 @@ def main():
             p.join()
     except:
         logging.info("stop")
-    finally:
-        send("STOP")
 
 
 if __name__ == "__main__":
