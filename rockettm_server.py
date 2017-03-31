@@ -9,7 +9,6 @@ from timekiller import call
 import importlib
 import time
 from basicevents import run, send, subscribe
-import basicevents
 import signal
 
 
@@ -42,6 +41,9 @@ finish_tasks = Event()
 
 def handler_stop_signals(signum, frame):
     logging.warning("server recieve sigterm")
+    if event_kill.is_set():
+        logging.warning("server forcing stop")
+        exit(1)
     event_kill.set()
 
 
@@ -165,6 +167,7 @@ def main():
     except:
         logging.warning("force stop")
     finish_tasks.set()
+
 
 if __name__ == "__main__":
     main()

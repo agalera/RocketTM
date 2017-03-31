@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.2.2 (2017-03-31)
+- support force exit
+
 ## 2.2.1 (2017-03-31)
 - sigterm safe
 
@@ -77,7 +80,7 @@
 ## 1.0.6 (2016-08-26)
  - retry sending the message to the queue 5 times before returning an exception
  - When you add in the queue fails, now returns an exception
- 
+
 ## 1.0.5 (2016-08-26)
  - timekiller stop propagate
  - fix inmortal server
@@ -93,7 +96,7 @@
  - Fix automatic declare queues
 
 ## 1.0.1 (2016-08-22)
- - send_task now sends the set ip 
+ - send_task now sends the set ip
 
 ## 1.0.0 (2016-07-19)
  - Added callback support
