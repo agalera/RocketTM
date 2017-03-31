@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.2.1 (2017-03-31)
+- sigterm safe
+
 ## 2.2.0 (2017-03-18)
 - callback is optional
 - return callback to rabbitmq (queue results)

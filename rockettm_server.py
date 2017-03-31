@@ -1,5 +1,5 @@
 import logging
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, Event
 from rockettm import tasks
 import traceback
 from kombu import Connection, Exchange, Queue
@@ -9,6 +9,8 @@ from timekiller import call
 import importlib
 import time
 from basicevents import run, send, subscribe
+import basicevents
+import signal
 
 
 if len(sys.argv) >= 2:
@@ -31,9 +33,20 @@ for mod in settings.imports:
 
 tasks.ip = settings.RABBITMQ_IP
 
-
 if not hasattr(settings, 'ROCKETTM_CALLBACK'):
     settings.ROCKETTM_CALLBACK = True
+
+event_kill = Event()
+finish_tasks = Event()
+
+
+def handler_stop_signals(signum, frame):
+    logging.warning("server recieve sigterm")
+    event_kill.set()
+
+
+signal.signal(signal.SIGINT, handler_stop_signals)
+signal.signal(signal.SIGTERM, handler_stop_signals)
 
 
 @subscribe('results')
@@ -42,12 +55,14 @@ def call_results(json, room='results'):
 
 
 class Worker(Process):
-    def __init__(self, name, concurrency, ip, durable=False, max_time=-1):
+    def __init__(self, event_kill, name, concurrency, ip, durable=False,
+                 max_time=-1):
         self.queue_name = name
         self.concurrency = concurrency
         self.ip = ip
         self.durable = durable
         self.max_time = max_time
+        self.event_kill = event_kill
         super(Worker, self).__init__()
 
     def safe_worker(self, func, return_dict, apply_max_time, body):
@@ -97,7 +112,7 @@ class Worker(Process):
         return True
 
     def run(self):
-        while True:
+        while not self.event_kill.is_set():
             try:
                 with Connection('amqp://guest:guest@%s//' % self.ip) as conn:
                     conn.ensure_connection()
@@ -105,7 +120,8 @@ class Worker(Process):
                                         durable=self.durable)
                     queue = Queue(name=self.queue_name,
                                   exchange=exchange,
-                                  durable=self.durable, routing_key=self.queue_name)
+                                  durable=self.durable,
+                                  routing_key=self.queue_name)
                     queue(conn).declare()
                     logging.info("create queue: %s durable: %s" %
                                  (self.queue_name, self.durable))
@@ -114,9 +130,12 @@ class Worker(Process):
                                       a_global=False)
                     with conn.Consumer(queue, callbacks=[self.callback],
                                        channel=channel) as consumer:
-                        while True:
-                            logging.info(consumer)
-                            conn.drain_events()
+                        while not self.event_kill.is_set():
+                            # logging.info(consumer)
+                            try:
+                                conn.drain_events(timeout=5)
+                            except:
+                                pass
 
             except (KeyboardInterrupt, SystemExit):
                 logging.warning("server stop!")
@@ -130,11 +149,11 @@ class Worker(Process):
 
 def main():
     # start basicevents
-    run()
+    run(finish_tasks.is_set)
     list_process = []
     for queue in settings.queues:
         for x in range(queue['concurrency']):
-            p = Worker(ip=settings.RABBITMQ_IP, **queue)
+            p = Worker(event_kill, ip=settings.RABBITMQ_IP, **queue)
             logging.info("start process worker: %s queue: %s" % (p,
                                                                  queue))
             list_process.append(p)
@@ -144,8 +163,8 @@ def main():
         for p in list_process:
             p.join()
     except:
-        logging.info("stop")
-
+        logging.warning("force stop")
+    finish_tasks.set()
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 import sys
 
 
-ip = "localhost"
+RABBITMQ_IP = "localhost"
 port = 5672
 
 logger = {  # 'filename': "rockettm.log",  # optional,
