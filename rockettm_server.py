@@ -2,7 +2,6 @@ import logging
 from multiprocessing import Process, Manager, Event
 from rockettm import tasks
 import traceback
-from kombu import Connection, Exchange, Queue
 import sys
 import os
 from timekiller import call
@@ -10,6 +9,8 @@ import importlib
 import time
 from basicevents import run, send, subscribe
 import signal
+from redisqueue import RedisQueue
+from redis import Redis
 
 
 if len(sys.argv) >= 2:
@@ -35,6 +36,9 @@ tasks.ip = settings.RABBITMQ_IP
 if not hasattr(settings, 'ROCKETTM_CALLBACK'):
     settings.ROCKETTM_CALLBACK = True
 
+if not hasattr(settings, 'ROCKETTM_SERIALIZER'):
+    settings.ROCKETTM_CALLBACK = "json"
+
 
 @subscribe('results')
 def call_results(json, room='results'):
@@ -42,14 +46,12 @@ def call_results(json, room='results'):
 
 
 class Worker(Process):
-    def __init__(self, event_kill, name, concurrency, ip, durable=False,
-                 max_time=-1):
+    def __init__(self, event_kill, name, concurrency, ip, max_time=-1):
         self.queue_name = name
         self.concurrency = concurrency
-        self.ip = ip
-        self.durable = durable
         self.max_time = max_time
         self.event_kill = event_kill
+        self.conn = RedisQueue(Redis(host=ip), self.queue_name)
         super(Worker, self).__init__()
 
     def safe_worker(self, func, return_dict, apply_max_time, body):
@@ -71,8 +73,7 @@ class Worker(Process):
         p.join()
         return return_dict
 
-    def callback(self, body, message):
-        message.ack()
+    def callback(self, body):
         logging.info("execute %s" % body['event'])
         _id = body['args'][0]
         if settings.ROCKETTM_CALLBACK:
@@ -102,33 +103,9 @@ class Worker(Process):
     def run(self):
         while not self.event_kill.is_set():
             try:
-                with Connection('amqp://guest:guest@%s//' % self.ip) as conn:
-                    conn.ensure_connection()
-                    exchange = Exchange(self.queue_name, 'direct',
-                                        durable=self.durable)
-                    queue = Queue(name=self.queue_name,
-                                  exchange=exchange,
-                                  durable=self.durable,
-                                  routing_key=self.queue_name)
-                    queue(conn).declare()
-                    logging.info("create queue: %s durable: %s" %
-                                 (self.queue_name, self.durable))
-                    channel = conn.channel()
-                    channel.basic_qos(prefetch_size=0, prefetch_count=1,
-                                      a_global=False)
-                    with conn.Consumer(queue, callbacks=[self.callback],
-                                       channel=channel) as consumer:
-                        while not self.event_kill.is_set():
-                            # logging.info(consumer)
-                            try:
-                                conn.drain_events(timeout=5)
-                            except:
-                                pass
-
-            except (KeyboardInterrupt, SystemExit):
-                logging.warning("server stop!")
-                break
-
+                task = self.conn.get(timeout=20)
+                if task:
+                    self.callback(task)
             except:
                 logging.error(traceback.format_exc())
                 logging.error("connection loss, try reconnect")
