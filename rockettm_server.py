@@ -35,21 +35,6 @@ tasks.ip = settings.RABBITMQ_IP
 if not hasattr(settings, 'ROCKETTM_CALLBACK'):
     settings.ROCKETTM_CALLBACK = True
 
-event_kill = Event()
-finish_tasks = Event()
-
-
-def handler_stop_signals(signum, frame):
-    logging.warning("server recieve sigterm")
-    if event_kill.is_set():
-        logging.warning("server forcing stop")
-        exit(1)
-    event_kill.set()
-
-
-signal.signal(signal.SIGINT, handler_stop_signals)
-signal.signal(signal.SIGTERM, handler_stop_signals)
-
 
 @subscribe('results')
 def call_results(json, room='results'):
@@ -78,6 +63,7 @@ class Worker(Process):
             logging.error(return_dict['result'])
 
     def safe_call(self, func, apply_max_time, body):
+        # os.setpgrp()  # kill non propagate
         return_dict = Manager().dict()
         p = Process(target=self.safe_worker, args=(func, return_dict,
                                                    apply_max_time, body))
@@ -149,8 +135,14 @@ class Worker(Process):
                 time.sleep(5)
 
 
+event_kill = Event()
+finish_tasks = Event()
+
+
 def main():
     # start basicevents
+    default_handler = signal.getsignal(signal.SIGINT)
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
     run(finish_tasks.is_set)
     list_process = []
     for queue in settings.queues:
@@ -161,11 +153,17 @@ def main():
             list_process.append(p)
             p.start()
 
+    signal.signal(signal.SIGINT, default_handler)
+
     try:
-        for p in list_process:
-            p.join()
+        signal.pause()
     except:
-        logging.warning("force stop")
+        print("init stop")
+        event_kill.set()
+
+    for x in list_process:
+        x.join()
+    print("finish tasks")
     finish_tasks.set()
 
 

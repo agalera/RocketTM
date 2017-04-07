@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.2.3 (2017-04-07)
+- Graceful stop
+
 ## 2.2.2 (2017-03-31)
 - support force exit
 
