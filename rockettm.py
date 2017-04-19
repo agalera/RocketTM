@@ -1,4 +1,4 @@
-from .redisqueue import RedisQueue
+from redisqueue import RedisQueue
 from redis import Redis
 import logging
 import uuid

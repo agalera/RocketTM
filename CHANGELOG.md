@@ -1,5 +1,9 @@
 # CHANGELOG
-## 2.2.6 (2017-04-19)
+## 2.2.9 (2017-04-19)
+- only support ujson
+- fix serializer
+
+## 2.2.8 (2017-04-19)
 - fix import
 
 ## 2.2.4 (2017-04-19)

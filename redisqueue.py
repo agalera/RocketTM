@@ -1,9 +1,3 @@
-try:
-    import ujson as json
-except ImportError:
-    import json
-
-
 class RedisQueue(object):
     """Simple Queue with Redis Backend"""
 
@@ -16,10 +10,7 @@ class RedisQueue(object):
         if serializer == 'pickle':
             import pickle as serializer
         else:
-            try:
-                import ujson as serializer
-            except ImportError:
-                import json as serializer
+            import ujson as serializer
 
         self.serializer = serializer
 
@@ -36,7 +27,8 @@ class RedisQueue(object):
 
     def put(self, item, name=None, namespace=None):
         """Put item into the queue."""
-        self.__db.rpush(self.gen_key(name, namespace), json.dumps(item))
+        self.__db.rpush(self.gen_key(name, namespace),
+                        self.serializer.dumps(item))
 
     def get(self, name=None, namespace=None, block=True, timeout=None):
         """ Remove and return an item from the queue.
@@ -50,7 +42,7 @@ class RedisQueue(object):
             item = self.__db.lpop(key)
 
         if item:
-            item = json.loads(item[1])
+            item = self.serializer.loads(item[1])
         return item
 
     def get_nowait(self, name=None, namespace=None):
