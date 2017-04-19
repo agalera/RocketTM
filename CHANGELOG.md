@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.2.4 (2017-04-19)
+- fix dependencies
+
 ## 2.2.3 (2017-04-07)
 - Graceful stop
 
