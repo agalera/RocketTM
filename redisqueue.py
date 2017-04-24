@@ -17,13 +17,13 @@ class RedisQueue(object):
     def gen_key(self, name=None, namespace=None):
         return '%s:%s' % (namespace or self.namespace, name or self.name)
 
-    def qsize(self):
+    def qsize(self, name=None, namespace=None):
         """Return the approximate size of the queue."""
-        return self.__db.llen(self.key)
+        return self.__db.llen(self.gen_key(name, namespace))
 
-    def empty(self):
+    def empty(self, name=None, namespace=None):
         """Return True if the queue is empty, False otherwise."""
-        return self.qsize() == 0
+        return self.qsize(name) == 0
 
     def put(self, item, name=None, namespace=None):
         """Put item into the queue."""

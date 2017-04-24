@@ -1,4 +1,8 @@
 # CHANGELOG
+## 2.2.10 (2017-04-24)
+- qsize support name and namespace arguments
+- empty support name and namespace arguments
+
 ## 2.2.9 (2017-04-19)
 - only support ujson
 - fix serializer
