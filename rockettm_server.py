@@ -13,6 +13,9 @@ from redisqueue import RedisQueue
 from redis import Redis
 
 
+if 'gevent' in sys.modules:
+    print("WARNING: gevent experimental support, is bad plan!")
+
 if len(sys.argv) >= 2:
     i, f = os.path.split(sys.argv[-1])
     sys.path.append(i)
@@ -66,11 +69,17 @@ class Worker(Process):
 
     def safe_call(self, func, apply_max_time, body):
         # os.setpgrp()  # kill non propagate
-        return_dict = Manager().dict()
-        p = Process(target=self.safe_worker, args=(func, return_dict,
-                                                   apply_max_time, body))
-        p.start()
-        p.join()
+
+        if 'gevent' not in sys.modules:
+            return_dict = Manager().dict()
+            p = Process(target=self.safe_worker, args=(func, return_dict,
+                                                       apply_max_time, body))
+            p.start()
+            p.join()
+        else:
+            return_dict = {}
+            self.safe_worker(func, return_dict, apply_max_time, body)
+
         return return_dict
 
     def callback(self, body):
