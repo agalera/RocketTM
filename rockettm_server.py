@@ -4,7 +4,6 @@ from rockettm import tasks
 import traceback
 import sys
 import os
-from timekiller import call
 import importlib
 import time
 from basicevents import run, send, subscribe
@@ -14,7 +13,11 @@ from redis import Redis
 
 
 if 'gevent' in sys.modules:
+    def call(func, apply_max_time, *args, **kwargs):
+        return func(*args, **kwargs)
     print("WARNING: gevent experimental support, is bad plan!")
+else:
+    from timekiller import call
 
 if len(sys.argv) >= 2:
     i, f = os.path.split(sys.argv[-1])
@@ -45,7 +48,9 @@ if not hasattr(settings, 'ROCKETTM_SERIALIZER'):
 
 @subscribe('results')
 def call_results(json, room='results'):
-    tasks.send_task('results', room, json)
+    print("envia resultado")
+    t = tasks.send_task('results', room, json)
+    print("enviado:", t)
 
 
 class Worker(Process):

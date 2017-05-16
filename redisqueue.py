@@ -27,8 +27,8 @@ class RedisQueue(object):
 
     def put(self, item, name=None, namespace=None):
         """Put item into the queue."""
-        self.__db.rpush(self.gen_key(name, namespace),
-                        self.serializer.dumps(item))
+        return self.__db.rpush(self.gen_key(name, namespace),
+                               self.serializer.dumps(item))
 
     def get(self, name=None, namespace=None, block=True, timeout=None):
         """ Remove and return an item from the queue.

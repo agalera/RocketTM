@@ -1,4 +1,10 @@
 # CHANGELOG
+## 2.2.12 (2017-05-16)
+- fix gevent incompatibility (timekiller)
+
+## 2.2.11 (2017-05-11)
+- fix gevent incompatibility
+
 ## 2.2.10 (2017-04-24)
 - qsize support name and namespace arguments
 - empty support name and namespace arguments
