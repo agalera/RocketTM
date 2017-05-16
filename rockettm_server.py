@@ -48,9 +48,7 @@ if not hasattr(settings, 'ROCKETTM_SERIALIZER'):
 
 @subscribe('results')
 def call_results(json, room='results'):
-    print("envia resultado")
-    t = tasks.send_task('results', room, json)
-    print("enviado:", t)
+    tasks.send_task('results', room, json)
 
 
 class Worker(Process):
