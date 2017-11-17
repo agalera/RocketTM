@@ -32,15 +32,15 @@ except:
 
 setup(
     name='rockettm',
-    version='2.2.2',
+    version='2.2.13',
     description='Rocket task manager',
     long_description=readme + '\n\n' + changelog,
     author='Alberto Galera Jimenez',
     author_email='galerajimenez@gmail.com',
     url='https://github.com/kianxineki/rockettm',
-    py_modules=['rockettm', 'rockettm_server'],
+    py_modules=['rockettm', 'rockettm_server', 'redisqueue'],
     include_package_data=True,
-    install_requires=['kombu', 'timekiller', 'basicevents'],
+    install_requires=['redis', 'timekiller', 'basicevents', 'ujson'],
     license="GPL",
     zip_safe=False,
     keywords='rockettm',

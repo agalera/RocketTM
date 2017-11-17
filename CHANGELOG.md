@@ -1,4 +1,30 @@
 # CHANGELOG
+## 2.2.13 (2017-05-16)
+- remove prints ...
+
+## 2.2.12 (2017-05-16)
+- fix gevent incompatibility (timekiller)
+
+## 2.2.11 (2017-05-11)
+- fix gevent incompatibility
+
+## 2.2.10 (2017-04-24)
+- qsize support name and namespace arguments
+- empty support name and namespace arguments
+
+## 2.2.9 (2017-04-19)
+- only support ujson
+- fix serializer
+
+## 2.2.8 (2017-04-19)
+- fix import
+
+## 2.2.4 (2017-04-19)
+- fix dependencies
+
+## 2.2.3 (2017-04-07)
+- Graceful stop
+
 ## 2.2.2 (2017-03-31)
 - support force exit
 

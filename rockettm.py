@@ -1,4 +1,5 @@
-from kombu import Connection, Exchange, Queue
+from redisqueue import RedisQueue
+from redis import Redis
 import logging
 import uuid
 import traceback
@@ -7,19 +8,19 @@ import time
 
 class tasks(object):
     subs = {}
-    queues = []
     ip = "localhost"
     conn = False
     producer = False
+    serializer = "json"
 
     # deprecated
     @staticmethod
-    def connect(ip=None):
-        if ip:
+    def connect(ip='localhost'):
+        if ip != 'localhost':
             tasks.ip = ip
-        logging.warning('reconnect amqp')
-        tasks.conn = Connection('amqp://guest:guest@%s//' % tasks.ip)
-        tasks.producer = tasks.conn.Producer(serializer='json')
+        tasks.conn = RedisQueue(Redis(host=tasks.ip),
+                                serializer=tasks.serializer)
+        logging.warning('connected redis')
 
     @staticmethod
     def add_task(event, func, max_time=-1):
@@ -44,25 +45,24 @@ class tasks(object):
 
         args = list((_id,) + args)
         logging.info("send task to queue %s, event %s" % (queue_name, event))
-        exchange = Exchange(queue_name, 'direct', durable=True)
-        queue = Queue(queue_name, exchange=exchange, routing_key=queue_name,
-                      durable=True)
+
+        if not tasks.conn:
+            tasks.connect()
 
         send_ok = False
         for retry in range(10):
-            if not tasks.conn or not tasks.conn.connected:
-                tasks.connect()
             try:
-                tasks.producer.publish({'event': event, 'args': args,
-                                        'kwargs': kwargs},
-                                       exchange=exchange,
-                                       routing_key=queue_name,
-                                       declare=[queue])
+                tasks.conn.put({'event': event,
+                                'args': args,
+                                'kwargs': kwargs},
+                               queue_name)
                 send_ok = True
                 break
             except:
                 logging.error(traceback.format_exc())
                 time.sleep(retry * 1.34)
+                tasks.connect()
+                print(traceback.format_exc())
         if send_ok:
             logging.info("send ok!")
             return _id
