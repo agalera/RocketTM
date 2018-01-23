@@ -15,11 +15,11 @@ Link pypi: https://pypi.python.org/pypi/rockettm
 
 ## Example
 
-### Rabbitmq not is localhost
+### Redis not is localhost
 ```python
 from rockettm import connect
 
-# to run it, reconnect to RabbitMQ
+# to run it, reconnect to Redis
 connect("other_ip_or_domain")
 
 ```
@@ -82,7 +82,7 @@ def long_call(*args, **kwargs):
 ### settings.py example
 ```python
 # settings.py example
-ip = "localhost"
+ip = "127.0.0.1"
 port = 5672
 
 logger = {'filename': "rockettm.log",  # optional,
@@ -135,7 +135,7 @@ connects to another server other than localhost
 
 rockettm currently used basicevents for noticificaciones the api. You can use basicevents as its official documentation *
 
-* Do not need to run (), rockettm up a common process for all workers
+* Do not need to run(), rockettm up a common process for all workers
 
 https://github.com/kianxineki/basicevents
 
