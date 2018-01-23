@@ -46,5 +46,5 @@ class RedisQueue(object):
         return item
 
     def get_nowait(self, name=None, namespace=None):
-        """Equivalent to get(False)."""
+        """Equivalent to get(block=False)."""
         return self.get(name=name, namespace=namespace, block=False)
