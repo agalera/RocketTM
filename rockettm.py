@@ -1,9 +1,10 @@
-from redisqueue import RedisQueue
-from redis import Redis
 import logging
 import uuid
 import traceback
 import time
+
+from redisqueue import RedisQueue
+from redis import Redis
 
 
 class tasks(object):
