@@ -1,15 +1,17 @@
-import logging
-from multiprocessing import Process, Manager, Event
-from rockettm import tasks
-import traceback
 import sys
 import os
+import logging
+import traceback
 import importlib
 import time
-from basicevents import run, send, subscribe
 import signal
+from multiprocessing import Process, Manager, Event
+
 from redisqueue import RedisQueue
 from redis import Redis
+from basicevents import run, send, subscribe
+
+from rockettm import tasks
 
 
 if 'gevent' in sys.modules:
