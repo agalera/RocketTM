@@ -137,5 +137,5 @@ rockettm currently used basicevents for noticificaciones the api. You can use ba
 
 * Do not need to run(), rockettm up a common process for all workers
 
-https://github.com/kianxineki/basicevents
+https://github.com/agalera/basicevents
 
