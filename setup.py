@@ -37,7 +37,7 @@ setup(
     long_description=readme + '\n\n' + changelog,
     author='Alberto Galera Jimenez',
     author_email='galerajimenez@gmail.com',
-    url='https://github.com/kianxineki/rockettm',
+    url='https://github.com/agalera/rockettm',
     py_modules=['rockettm', 'rockettm_server', 'redisqueue'],
     include_package_data=True,
     install_requires=['redis', 'timekiller', 'basicevents', 'ujson'],
